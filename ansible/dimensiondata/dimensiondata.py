@@ -326,8 +326,20 @@ def create_node(client, module, name, wait):
     network_domain = get_network_domain(client,
                                         module.params['network_domain'],
                                         module.params['location'])
+    if not network_domain:
+        module.fail_json(msg="Network Domain %s not found in location %s" %
+                          (module.params["network_domain"],
+                           module.params["location"]))
+
     dd_vlan = get_vlan(client, module.params['vlan'],
                        module.params['location'], network_domain)
+
+    if not dd_vlan:
+        module.fail_json(msg="VLAN ID %s not found in location %s, " \
+                         "network domain %s" % (module.params["vlan"],
+                                                module.params["location"],
+                                                network_domain))
+
     image = get_image(client, module, dd_vlan.location.id)
     if get_mcp_version == '1.0':
         node = client.create_node(name, image.id, admin_password,
