@@ -230,6 +230,7 @@ EXAMPLES = '''
 def node_to_node_obj(node):
     node_obj = {}
     node_obj['id'] = node.id
+    node_obj['name'] = node.name
     node_obj['ipv6'] = node.extra['ipv6']
     node_obj['os_type'] = node.extra['OS_type']
     node_obj['private_ipv4'] = node.private_ips
