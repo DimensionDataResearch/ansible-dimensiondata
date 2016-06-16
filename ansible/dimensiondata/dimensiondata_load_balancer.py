@@ -73,6 +73,11 @@ options:
           be taken to mean "Any Port"
     required: false
     default: None
+  listener_ip_address:
+    description:
+        - Must be a valid IPv4 in dot-decimal notation (x.x.x.x).
+    required: false
+    default: None
   protocol:
     description:
         - Choice of %s.
@@ -202,7 +207,8 @@ def main():
             algorithm=dict(default='ROUND_ROBIN', choices=lb_algs),
             members=dict(default=None, type='list'),
             ensure=dict(default='present', choices=['present', 'absent']),
-            verify_ssl_cert=dict(required=False, default=True, type='bool')
+            verify_ssl_cert=dict(required=False, default=True, type='bool'),
+            listener_ip_address=dict(required=False, default=None, type='str')
         )
     )
 
@@ -225,6 +231,7 @@ def main():
     members = module.params['members']
     verify_ssl_cert = module.params['verify_ssl_cert']
     ensure = module.params['ensure']
+    listener_ip_address = module.params['listener_ip_address']
 
     # -------------------
     # Instantiate drivers
@@ -257,10 +264,13 @@ def main():
                             for m in members]
             # Create load balancer
             try:
-                balancer = lb_driver.create_balancer(name, port, protocol,
-                                                     getattr(Algorithm,
-                                                             algorithm),
-                                                     members_list)
+                balancer = lb_driver.create_balancer(
+                    name,
+                    port,
+                    protocol,
+                    getattr(Algorithm, algorithm),
+                    members_list,
+                    ex_listener_ip_address=listener_ip_address)
                 module.exit_json(changed=True, msg="Success.",
                                  load_balancer=balancer_obj_to_dict(balancer))
             except DimensionDataAPIException as e:
