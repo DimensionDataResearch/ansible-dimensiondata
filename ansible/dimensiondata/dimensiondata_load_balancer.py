@@ -69,9 +69,10 @@ options:
     required: true
   port:
     description:
-        - Port the load balancer should listen on, defaults to 80 (required).
+        - An integer in the range of 1-65535. If not supplied, it will
+          be taken to mean "Any Port"
     required: false
-    default: 80
+    default: None
   protocol:
     description:
         - Choice of %s.
@@ -178,8 +179,14 @@ def get_balancer(module, driver, name):
 
 
 def balancer_obj_to_dict(lb_obj):
-    return {'id': lb_obj.id, 'name': lb_obj.name, 'state': lb_obj.state,
-            'ip': int(lb_obj.state), 'ip': lb_obj.ip, 'port': int(lb_obj.port)}
+    return {
+        'id': lb_obj.id,
+        'name': lb_obj.name,
+        'state': lb_obj.state,
+        'state': int(lb_obj.state),
+        'ip': lb_obj.ip,
+        'port': 'Any Port' if lb_obj.port is None else int(lb_obj.port)
+    }
 
 
 def main():
@@ -190,7 +197,7 @@ def main():
             network_domain=dict(required=True, type='str'),
             name=dict(required=True, type='str'),
             description=dict(default=None, type='str'),
-            port=dict(default=80, type='int'),
+            port=dict(default=None, type='int'),
             protocol=dict(default='http', choices=protocols),
             algorithm=dict(default='ROUND_ROBIN', choices=lb_algs),
             members=dict(default=None, type='list'),
@@ -246,7 +253,7 @@ def main():
         balancer = get_balancer(module, lb_driver, name)
         if balancer is False:
             # Build mebers list
-            members_list = [Member(m['name'], m['ip'], m['port'])
+            members_list = [Member(m['name'], m['ip'], m.get('port'))
                             for m in members]
             # Create load balancer
             try:
