@@ -53,7 +53,7 @@ def get_credentials():
     # Environment failed try dot file
     if user_id is None or key is None:
         home = expanduser('~')
-        config = ConfigParser.SafeConfigParser()
+        config = ConfigParser.RawConfigParser()
         config.read("%s/.dimensiondata" % home)
         try:
             user_id = config.get("dimensiondatacloud", "DIDATA_USER")
