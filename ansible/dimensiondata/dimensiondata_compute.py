@@ -5,7 +5,7 @@ from ansible.module_utils.dimensiondata import *
 HAS_LIBCLOUD = True
 try:
     from libcloud.common.dimensiondata import DimensionDataAPIException
-    from libcloud.compute.types import Provider
+    from libcloud.compute.types import Provider, InvalidCredsError
     from libcloud.compute.providers import get_driver
     import libcloud.security
 except ImportError:
@@ -267,8 +267,10 @@ def get_nodes(client, module):
             matched_nodes = [node]
         else:
             nodes = client.list_nodes(location)
+
             matched_nodes = list(filter(lambda x: x.name == node,
                                         nodes))
+
         if len(matched_nodes) < 1:
             nodes_dict[node] = {'id': [], 'name': [], 'node': []}
         elif len(matched_nodes) >= 1:
@@ -573,6 +575,10 @@ def main():
 
     try:
         core(module)
+    except (InvalidCredsError), e:
+        module.fail_json(msg="Invalid Credentials Error: please check the "
+                         "Dimension Data Cloud credentials you provided then "
+                         "try again.")
     except (Exception), e:
         module.fail_json(msg=str(e))
 
