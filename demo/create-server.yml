@@ -2,15 +2,14 @@
   - name: Create a DimensionData Host
     hosts: localhost
     vars:
-      vlan_id: bd6fbee5-17db-49f8-b1f5-3b213cea3061
-      network_domain_id: 423c4386-87b4-43c4-9604-88ae237bfc7f
       admin_password: fakepass
     tasks:
       - name: Create host
         dimensiondata_compute:
           ensure: running
-          vlan_id: '{{ vlan_id }}'
-          network_domain_id: '{{ network_domain_id }}'
+          vlans:
+            - my_vlan_1
+            - my_vlan_2
           description: 'my new node'
           image: 'RedHat 7 64-bit 2 CPU'
           nodes:

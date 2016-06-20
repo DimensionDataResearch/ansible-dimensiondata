@@ -46,10 +46,18 @@ options:
     required: true
     default: null
     aliases: []
-  vlan:
+  vlans:
     description:
-      - The name or ID of the vlan to provision to.
-    required: true
+      - > List of names or IDs of the VLANs to connect to. They will be
+          connected in order specified.
+    required: false
+    default: null
+    aliases: []
+  ipv4_addresses:
+    description:
+      - > List of IPv4 addresses to connect. Only one address per VLAN/Network
+          is allowed.
+    reqauired: false
     default: null
     aliases: []
   network_domain:
@@ -87,16 +95,6 @@ options:
     aliases: []
   secondary_dns:
     description: Secondary DNS server IP or FQDN.
-    required: false
-    default: null
-    aliases: []
-  additional_nics_vlan:
-    description: List of additional NICs by VLAN.
-    required: false
-    default: null
-    aliases: []
-  additional_nics_ipv4:
-    description: List of additional NICs by ipv4 address.
     required: false
     default: null
     aliases: []
@@ -260,7 +258,7 @@ def node_to_node_obj(node):
 # ---------------------------------------------
 def get_nodes(client, module):
     nodes_dict = {}
-    location = module.params['location']
+    location = module.params['location'].upper()
     nodes = list(set(module.params['nodes']))
     for node in nodes:
         if is_uuid(node):
@@ -282,7 +280,7 @@ def get_nodes(client, module):
 
 
 def get_all_nodes(client, module):
-    location = module.params['location']
+    location = module.params['location'].upper()
     domain = module.params['network_domain']
     try:
         return client.list_nodes(ex_location=location,
@@ -335,47 +333,62 @@ def validate_unique_names(client, module):
 
 
 def create_node(client, module, name, wait):
+    location = module.params['location'].upper()
     admin_password = module.params['admin_password']
     network_domain = get_network_domain(client,
                                         module.params['network_domain'],
-                                        module.params['location'])
+                                        location)
     if not network_domain:
         module.fail_json(msg="Network Domain %s not found in location %s" %
                          (module.params["network_domain"],
                           module.params["location"]))
 
-    dd_vlan = get_vlan(client, module.params['vlan'],
-                       module.params['location'], network_domain)
-
-    if not dd_vlan:
-        module.fail_json(msg="VLAN ID %s not found in location %s, " +
-                         "network domain %s" % (module.params["vlan"],
-                                                module.params["location"],
-                                                network_domain))
-
-    image = get_image(client, module, dd_vlan.location.id)
     pri_dns = module.params['primary_dns']
     sec_dns = module.params['secondary_dns']
+
+    # Check if we are using vlans or ipv4_addresses
+    vlan = None
+    add_vlans = None
+    ipv4 = None
+    add_ipv4s = None
+    if module.params['vlans'] is not None:
+        pri_vlan = module.params['vlans'][0]
+        vlan = get_vlan(client, pri_vlan, location, network_domain)
+        if not vlan:
+            module.fail_json(msg="VLAN ID %s not found in location %s, " +
+                             "network domain %s" % (pri_vlan, location,
+                                                    network_domain))
+        if len(module.params['vlans']) > 1:
+            add_vlans = []
+            for v in module.params['vlans'][1:]:
+                res = get_vlan(client, v, location, network_domain)
+                add_vlans.append(res.id)
+    else:
+        ipv4 = module.params['ipv4_addresses'][0]
+        if len(module.params['ipv4_addresses']) > 1:
+            add_ipv4s = module.params['ipv4_addresses'][1:]
+    # Get image
+    image = get_image(client, module, network_domain.location.id)
     if get_mcp_version == '1.0':
         node = client.create_node(name, image.id, admin_password,
                                   module.params['description'],
                                   ex_network=network_domain.id,
-                                  ex_vlan=dd_vlan.id,
+                                  ex_vlan=vlan,
+                                  ex_primary_ipv4=ipv4,
                                   ex_memory_gb=module.params['memory_gb'],
                                   ex_primary_dns=pri_dns,
                                   ex_secondary_dns=sec_dns)
     else:
-        anv = module.params['additional_nics_vlan']
-        ani = module.params['additional_nics_ipv4']
         node = client.create_node(name, image.id, admin_password,
                                   module.params['description'],
                                   ex_network_domain=network_domain.id,
-                                  ex_vlan=dd_vlan.id,
+                                  ex_vlan=vlan,
+                                  ex_primary_ipv4=ipv4,
                                   ex_memory_gb=module.params['memory_gb'],
                                   ex_primary_dns=pri_dns,
                                   ex_secondary_dns=sec_dns,
-                                  ex_additional_nics_vlan=anv,
-                                  ex_additional_nics_ipv4=ani)
+                                  ex_additional_nics_vlan=add_vlans,
+                                  ex_additional_nics_ipv4=add_ipv4s)
     if wait is True:
         node = wait_for_server_state(client, module, node.id, 'running')
     return node
@@ -504,6 +517,13 @@ def module_key_die_if_none(module, key):
     return v
 
 
+def validate_ipv4s_node_count(client, module):
+    if len(module.params['nodes']) > 1 and \
+            module.params['ipv4_addresses'] is not None:
+        module.fail_json(msg="'ipv4s' argument is not valid when specifying " +
+                         "more then one node.")
+
+
 def core(module):
     changed = False
     credentials = get_credentials()
@@ -520,6 +540,8 @@ def core(module):
     client = DimensionData(user_id, key, region=region)
 
     validate_unique_names(client, module)
+
+    validate_ipv4s_node_count(client, module)
 
     # Get nodes/servers details
     # Return: {<module.params['nodes'][n]>: {'id': [], 'name': [], 'node': []}}
@@ -544,7 +566,8 @@ def main():
                                              'server_ids',
                                              'node_id']),
             image=dict(),
-            vlan=dict(),
+            vlans=dict(required=False, type='list', default=None),
+            ipv4_addresses=dict(required=False, type='list', default=None),
             network_domain=dict(),
             location=dict(required=True, type='str'),
             admin_password=dict(),
@@ -554,10 +577,6 @@ def main():
                              type='str'),
             secondary_dns=dict(required=False, default=None,
                                type='str'),
-            additional_nics_vlan=dict(required=False, default=None,
-                                      type='list'),
-            additional_nics_ipv4=dict(required=False, default=None,
-                                      type='list'),
             operate_on_multiple=dict(required=False, default=False,
                                      type='bool'),
             region=dict(default='na', choices=dd_regions),
@@ -566,7 +585,8 @@ def main():
             wait=dict(required=False, default=False, type='bool'),
             wait_time=dict(required=False, default=600, type='int'),
             wait_poll_interval=dict(required=False, default=2, type='int')
-        )
+        ),
+        mutually_exclusive=(["vlans", "ipv4_addresses"])
     )
     if not HAS_LIBCLOUD:
         module.fail_json(msg='libcloud >= 1.0.0pre required for this module')
