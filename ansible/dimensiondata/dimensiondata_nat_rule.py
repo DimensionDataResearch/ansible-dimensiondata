@@ -24,7 +24,9 @@ from ansible.module_utils.dimensiondata import *
 try:
     from libcloud.common.dimensiondata import DimensionDataAPIException
     from libcloud.compute.types import Provider
+    from libcloud.loadbalancer.types import Provider as LBProvider
     from libcloud.compute.providers import get_driver
+    from libcloud.loadbalancer.providers import get_driver as get_lb_driver
     import libcloud.security
     HAS_LIBCLOUD = True
 except:
@@ -62,8 +64,12 @@ options:
   external_ip:
     description:
         - The public/external IPv4 address.
-    required: true
-    default: false
+    required: false
+    default: null
+  provision_external_ip:
+    description: Auto allocates a public IP address.
+    required: false
+    defauilt: true
   verify_ssl_cert:
     description:
       - Check that SSL certificate is valid.
@@ -120,35 +126,17 @@ nat_rule:
 '''
 
 
-def get_nat_rule(module, client, network_domain, external_ip, internal_ip):
-    ext_in_use = 'External IP is not in use.'
-    int_in_use = 'Internal IP is not in use.'
+def get_nat_rule(module, client, network_domain, internal_ip):
     try:
         nat_rules = client.ex_list_nat_rules(network_domain)
     except DimensionDataAPIException as e:
         module.fail_json(msg="Unexpected API error: %s" % e)
 
-    rules = filter(lambda x: x.external_ip == external_ip
-                   and x.internal_ip == internal_ip, nat_rules)
+    rules = filter(lambda x: x.internal_ip == internal_ip, nat_rules)
     if len(rules) > 0:
         return rules[0]
-    # Search for rule both by internal and external IPs so we can discover
-    # which ones are in use
-    ext_rules = filter(lambda x: x.external_ip == external_ip, nat_rules)
-    int_rules = filter(lambda x: x.internal_ip == internal_ip, nat_rules)
-    if len(ext_rules) == 0 and len(int_rules) == 0:
+    else:
         return False
-    elif len(ext_rules) > 0 and len(int_rules) == 0:
-        extid = ext_rules[0].id
-        ext_in_use = "'external_ip' %s is " % external_ip + \
-                     "already in use in the NAT %s " % extid + \
-                     "for Network Domain %s" % network_domain
-    elif len(ext_rules) == 0 and len(int_rules) > 0:
-        intid = int_rules[0].id
-        int_in_use = "'internal_ip' %s is " % internal_ip + \
-                     "already in use in the NAT %s " % intid + \
-                     "for Network Domain %s" % network_domain
-    module.fail_json(msg="%s %s" % (ext_in_use, int_in_use))
 
 
 def nat_obj_to_dict(nat_obj):
@@ -170,11 +158,14 @@ def main():
             region=dict(default='na', choices=dd_regions),
             location=dict(required=True, type='str'),
             network_domain=dict(required=True, type='str'),
-            external_ip=dict(required=True, type='str'),
+            external_ip=dict(required=False, default=None, type='str'),
             internal_ip=dict(required=True, type='str'),
             ensure=dict(default='present', choices=['present', 'absent']),
-            verify_ssl_cert=dict(required=False, default=True, type='bool')
-        )
+            verify_ssl_cert=dict(required=False, default=True, type='bool'),
+            provision_external_ip=dict(required=False, default=True,
+                                       type='bool')
+        ),
+        mutually_exclusive=(["external_ip", "provision_external_ip"])
     )
 
     if not HAS_LIBCLOUD:
@@ -196,6 +187,10 @@ def main():
 
     # Instantiate client
     libcloud.security.VERIFY_SSL_CERT = verify_ssl_cert
+    # Instantiate Load Balancer Driver
+    DDLoadBalancer = get_lb_driver(LBProvider.DIMENSIONDATA)
+    lb_client = DDLoadBalancer(user_id, key, region=region)
+    # Instantiate compute driver
     DimensionData = get_driver(Provider.DIMENSIONDATA)
     client = DimensionData(user_id, key, region=region)
 
@@ -205,14 +200,21 @@ def main():
         module.fail_json(msg="Network domain could not be found.")
 
     # Try to find NAT rule
-    nat_rule = get_nat_rule(module, client, net_domain, external_ip,
-                            internal_ip)
+    nat_rule = get_nat_rule(module, client, net_domain, internal_ip)
     # Process action
     if ensure == 'present':
         if nat_rule is False:
+            # Get external IP
+            if module.params['provision_external_ip'] is True:
+                # Get addresses
+                res = get_unallocated_public_ips(module, client, lb_client,
+                                                 net_domain, True, 1)
+                ext_ip = res['addresses'][0]
+            else:
+                ext_ip = external_ip
             try:
                 res = client.ex_create_nat_rule(net_domain, internal_ip,
-                                                external_ip)
+                                                ext_ip)
             except DimensionDataAPIException as e:
                 module.fail_json(msg="Unexpected API error: %s" % e)
             # Exit with error if IP address out of range

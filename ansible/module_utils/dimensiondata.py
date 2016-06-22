@@ -24,6 +24,7 @@ import os
 import ConfigParser
 from os.path import expanduser
 from libcloud.common.dimensiondata import API_ENDPOINTS
+from libcloud.common.dimensiondata import DimensionDataAPIException
 from uuid import UUID
 
 
@@ -113,7 +114,7 @@ def get_network_domain(driver, locator, location):
             return False
     try:
         return driver.ex_get_network_domain(net_id)
-    except:
+    except DimensionDataAPIException:
         return False
 
 
@@ -157,3 +158,175 @@ def is_uuid(u, version=4):
         return str(uuid_obj) == u
     except:
         return False
+
+
+# --------------------------------------------
+# Expand public IP block to show all addresses
+# --------------------------------------------
+def expand_ip_block(block):
+    addresses = []
+    ip_r = block.base_ip.split('.')
+    last_quad = int(ip_r[3])
+    address_root = "%s.%s.%s." % (ip_r[0], ip_r[1], ip_r[2])
+    for i in range(int(block.size)):
+        addresses.append(address_root + str(last_quad + i))
+    return addresses
+
+
+# ---------------------------
+# Get public IP block details
+# ---------------------------
+def get_public_ip_block(module, driver, network_domain, block_id=False,
+                        base_ip=False):
+    # Block ID given, try to use it.
+    if block_id is not 'False':
+        try:
+            block = driver.ex_get_public_ip_block(block_id)
+        except DimensionDataAPIException as e:
+            # 'UNEXPECTED_ERROR' should be removed once upstream bug is fixed.
+            # Currently any call to ex_get_public_ip_block where the block does
+            # not exist will return UNEXPECTED_ERROR rather than
+            # 'RESOURCE_NOT_FOUND'.
+            if e.code == "RESOURCE_NOT_FOUND" or e.code == 'UNEXPECTED_ERROR':
+                module.exit_json(changed=False, msg="Public IP Block does "
+                                 "not exist")
+            else:
+                module.fail_json(msg="Unexpected error while retrieving "
+                                 "block: %s" % e.code)
+            module.fail_json(msg="Error retreving Public IP Block " +
+                                 "'%s': %s" % (block.id, e.message))
+    # Block ID not given, try to use base_ip.
+    else:
+        blocks = list_public_ip_blocks(module, driver, network_domain)
+        if blocks is not False:
+            block = filter(lambda x: x.base_ip == base_ip, blocks)[0]
+        else:
+            module.exit_json(changed=False, msg="IP block starting with "
+                             "'%s' does not exist." % base_ip)
+    return block
+
+
+# --------------------------------
+# Get list of NAT rules for domain
+# --------------------------------
+def list_nat_rules(module, driver, network_domain):
+    try:
+        return driver.ex_list_nat_rules(network_domain)
+    except DimensionDataAPIException as e:
+        module.fail_json(msg="Failed to list NAT rules: %s" % e.message)
+
+
+# -----------------------------------------
+# Get list of public IP blocks for a domain
+# -----------------------------------------
+def list_public_ip_blocks(module, driver, network_domain):
+    try:
+        blocks = driver.ex_list_public_ip_blocks(network_domain)
+        if len(blocks) == 0:
+            return []
+        else:
+            return blocks
+    except DimensionDataAPIException as e:
+        module.fail_json(msg="Error retreving Public IP Blocks: %s" % e)
+
+
+# --------------------------------------
+# Get public IP block allocation details
+# --------------------------------------
+def get_block_allocation(module, cp_driver, lb_driver, network_domain, block):
+    #  Shows all ips in block and if they are allocated
+    # ex: {'id': 'eb8b16ca-3c91-45fb-b04b-5d7d387a9f4a',
+    #       'addresses': [{'address': '162.2.100.100',
+    #                      'allocated': True
+    #                      },
+    #                      {'address': '162.2.100.101',
+    #                       'allocated': False
+    #                      }
+    #                     ]
+    #     }
+    nat_rules = list_nat_rules(module, cp_driver, network_domain)
+    balancers = list_balancers(module, lb_driver)
+    pub_ip_block = get_public_ip_block(module, cp_driver, network_domain,
+                                       block.id, False)
+    pub_ips = expand_ip_block(pub_ip_block)
+    block_detailed = {'id': block.id, 'addresses': []}
+    for ip in pub_ips:
+        allocated = False
+        nat_match = filter(lambda x: x.external_ip == ip, nat_rules)
+        lb_match = filter(lambda x: x.ip == ip, balancers)
+        if len(nat_match) > 0 or len(lb_match) > 0:
+            allocated = True
+        else:
+            allocated = False
+        block_detailed['addresses'].append({'address': ip,
+                                            'allocated': allocated})
+    return block_detailed
+
+
+def list_balancers(module, lb_driver):
+    try:
+        return lb_driver.list_balancers()
+    except DimensionDataAPIException as e:
+        module.fail_json(msg="Failed to list Load Balancers: %s" % e.message)
+
+
+# --------------------------------------
+# Get list of public IP blocks with one
+# or more unallocated IPs
+# --------------------------------------
+def get_blocks_with_unallocated(module, cp_driver, lb_driver, network_domain):
+    # Gets ip blocks with one or more unallocated IPs.
+    # ex:
+    #   {'unallocated_count': <total count of unallocated ips>,
+    #    'ip_blocks': [<list of expanded blocks with details
+    #                  (see get_block_allocation())>],
+    #    'unallocated_addresses': [<list of unallocated ip addresses>]
+    #   }
+    total_unallocated_ips = 0
+    all_blocks = list_public_ip_blocks(module, cp_driver, network_domain)
+    unalloc_blocks = []
+    unalloc_addresses = []
+    for block in all_blocks:
+        d_blocks = get_block_allocation(module, cp_driver, lb_driver,
+                                        network_domain, block)
+        i = 0
+        for addr in d_blocks['addresses']:
+            if addr['allocated'] is False:
+                if i == 0:
+                    unalloc_blocks.append(d_blocks)
+                unalloc_addresses.append(addr['address'])
+                total_unallocated_ips += 1
+            i += 1
+    return {'unallocated_count': total_unallocated_ips,
+            'ip_blocks': unalloc_blocks,
+            'unallocated_addresses': unalloc_addresses}
+
+
+# -------------------------------------------
+# Get and/or provision unallocated public IPs
+# -------------------------------------------
+def get_unallocated_public_ips(module, cp_driver, lb_driver, network_domain,
+                               reuse_free, count):
+    free_ips = []
+    if reuse_free is True:
+        blocks_with_unallocated = get_blocks_with_unallocated(module,
+                                                              cp_driver,
+                                                              lb_driver,
+                                                              network_domain)
+        free_ips = blocks_with_unallocated['unallocated_addresses']
+    if len(free_ips) < count:
+        num_needed = count-len(free_ips)
+        for i in range(num_needed):
+            block = cp_driver.ex_add_public_ip_block_to_network_domain(
+                network_domain)
+            b_dict = get_block_allocation(module, cp_driver, lb_driver,
+                                          network_domain, block)
+            for addr in b_dict['addresses']:
+                free_ips.append(addr['address'])
+            if len(free_ips) >= count:
+                break
+        return {'changed': True, 'msg': 'Allocated public IP block(s)',
+                'addresses': free_ips[:count]}
+    else:
+        return {'changed': False, 'msg': 'Found enough unallocated IPs' +
+                'without provisioning.', 'addresses': free_ips[:count]}

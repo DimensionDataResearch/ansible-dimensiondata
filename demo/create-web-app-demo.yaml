@@ -28,11 +28,12 @@
         action: create
         wait: yes
       register: vlan
-# Create host 1
-    - name: Create host 1
+# Create host_1
+    - name: create_host_1
       dimensiondata_compute:
         ensure: present
-        vlan: "{{ vlan['vlan']['id'] }}"
+        vlans:
+          - "{{ vlan['vlan']['id'] }}"
         network_domain: "{{ network['network']['id'] }}"
         location: "{{location}}"
         description: 'server1'
@@ -46,10 +47,11 @@
         wait: no
       register: host1
 # Create host 2
-    - name: Create host 2
+    - name: create_host_2
       dimensiondata_compute:
         ensure: present
-        vlan: "{{ vlan['vlan']['id'] }}"
+        vlans:
+          - "{{ vlan['vlan']['id'] }}"
         network_domain: "{{ network['network']['id'] }}"
         location: "{{location}}"
         description: 'server2'
@@ -60,22 +62,6 @@
         admin_password: "{{password}}"
         wait: yes
       register: host2
-# Add public IP block 1
-    - name: Add public IP block 1
-      dimensiondata_public_ip_block:
-        region: "{{region}}"
-        location: "{{location}}"
-        network_domain: "{{ network['network']['id'] }}"
-        action: add
-      register: pub_ips1
-# Add public IP block 1
-    - name: Add public IP block 2
-      dimensiondata_public_ip_block:
-        region: "{{region}}"
-        location: "{{location}}"
-        network_domain: "{{ network['network']['id'] }}"
-        action: add
-      register: pub_ips2
 # Create load balancer
     - name: Create Load Balancer
       dimensiondata_load_balancer:
@@ -101,16 +87,16 @@
         location: "{{location}}"
         network_domain: "{{network_name}}"
         internal_ip: "{{ host1['nodes'][0]['private_ipv4'][0] }}"
-        external_ip: "{{ pub_ips2['public_ip_block']['addresses'][0] }}"
         ensure: present
+      register: pub_ips1
     - name: Create NAT rule 2
       dimensiondata_nat_rule:
         region: "{{region}}"
         location: "{{location}}"
         network_domain: "{{network_name}}"
         internal_ip: "{{ host2['nodes'][0]['private_ipv4'][0] }}"
-        external_ip: "{{ pub_ips2['public_ip_block']['addresses'][1] }}"
         ensure: present
+      register: pub_ips2
 # Create Firewall rules
     - name: Create HTTP firewall rule
       dimensiondata_firewall:
@@ -143,13 +129,13 @@
         destination_port: 22
         position: LAST
     - name: add host 1
-      add_host: hostname="{{ hostvars['127.0.0.1']['pub_ips2']['public_ip_block']['addresses'][0] }}"
+      add_host: hostname="{{ pub_ips1['nat_rule']['external_ip'] }}:22"
     - name: add host 2
-      add_host: hostname="{{ hostvars['127.0.0.1']['pub_ips2']['public_ip_block']['addresses'][1] }}"
+      add_host: hostname="{{ pub_ips2['nat_rule']['external_ip'] }}:22"
 # Deploy web app from git to LB members
 - user: root
   vars:
-    webservers: "{{ hostvars['127.0.0.1']['pub_ips2']['public_ip_block']['addresses'][0] }},{{ hostvars['127.0.0.1']['pub_ips2']['public_ip_block']['addresses'][1] }}"
+    webservers: "{{ hostvars['127.0.0.1']['pub_ips2']['nat_rule']['external_ip'] }},{{ hostvars['127.0.0.1']['pub_ips1']['nat_rule']['external_ip'] }}"
   hosts: "{{ webservers }}"
   tasks:
 # Install packages

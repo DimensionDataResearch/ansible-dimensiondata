@@ -491,7 +491,7 @@ def quiesce_servers_states(client, module, nodes_dict):
         elif desired_state == 'absent' and len(node['node']) > 0:
             if req_node_count < exi_node_count:
                 module.fail_json(msg="UNSAFE OPERATION DETECTED: More nodes " +
-                                     "exist with a listed name then were " +
+                                     "exist with a listed name than were " +
                                      "specified.")
             for n in node['node']:
                 try:
@@ -523,7 +523,7 @@ def validate_ipv4s_node_count(client, module):
     if len(module.params['nodes']) > 1 and \
             module.params['ipv4_addresses'] is not None:
         module.fail_json(msg="'ipv4s' argument is not valid when specifying " +
-                         "more then one node.")
+                         "more than one node.")
 
 
 def core(module):
