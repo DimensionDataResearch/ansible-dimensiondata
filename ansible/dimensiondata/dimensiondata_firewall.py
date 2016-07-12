@@ -258,11 +258,13 @@ def create_firewall_rule(module, driver, name, action, network_domain_id,
         source_address = DimensionDataFirewallAddress(source_any, source_ip,
                                                       source_ip_prefix_size,
                                                       source_start_port,
-                                                      source_end_port)
+                                                      source_end_port, None,
+                                                      None)
         dest_address = DimensionDataFirewallAddress(dest_any, destination_ip,
                                                     destination_ip_prefix_size,
                                                     destination_start_port,
-                                                    destination_end_port)
+                                                    destination_end_port, None,
+                                                    None)
         rule = DimensionDataFirewallRule(id=None, name=name, action=action,
                                          location=network_domain.location,
                                          network_domain=network_domain,
@@ -318,9 +320,9 @@ def to_source_or_destination(addresses, ports):
             end_port = port_parts[1]
         else:
             start_port = port_parts[0]
-            end_port = port_parts[0]
+            end_port = None
     return DimensionDataFirewallAddress(any_ip, ip_address, ip_prefix_size,
-                                        start_port, end_port)
+                                        start_port, end_port, None, None)
 
 
 def sync_firewall_rule_state(module, driver, fw_rule, state):

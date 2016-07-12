@@ -35,9 +35,10 @@ dd_regions = get_dd_regions()
 
 DOCUMENTATION = '''
 ---
-module: dimensiondata_public_ip_block
+module: dimensiondata_get_unallocated_public_ips
 short_description:
-    - Create, delete and list public IP blocks.
+    - > Get specified number of free addresses,
+        provision to reach requested number.
 version_added: '2.1'
 author: 'Aimon Bustardo (@aimonb)'
 options:
@@ -53,23 +54,6 @@ options:
   location:
     description:
       - The target datacenter.
-    required: true
-  block_id:
-    description:
-      - The first IP of the newtork block.
-      - This or 'base_ip' is required when releasing existing block.
-    required: false
-    default: false
-  base_ip:
-    description:
-      - The first IP of the newtork block.
-      - This or 'block_id' Required when releasing existing block.
-    required: false
-    default: false
-  action:
-    description:
-      - Get, add or delete public IP blocks,
-    choices: [get, get_free, add, delete]
     required: true
   count:
     description: Number of public IPs needed.
@@ -87,68 +71,68 @@ options:
 ''' % str(dd_regions)
 
 EXAMPLES = '''
-# Add public IP block
-- dimensiondata_public_ip_block:
+# Get 3 unallocated/free public IPs, reuse existing free.
+- dimensiondata_get_unallocated_public_ips:
     region: na
     location: NA5
     network_domain: test_network
-    action: add
-# Delete public IP Block by base IP.
-- dimensiondata_public_ip_block:
+    count: 3
+# Get 3 unallocated/free public IPs, do not reuse exisiting free.
+- dimensiondata_get_unallocated_public_ips:
     region: na
     location: NA5
     network_domain: test_network
-    action: delete
-    base_ip: 168.128.2.100
-# Delete public IP Block by block ID.
-- dimensiondata_public_ip_block:
-    region: na
-    location: NA5
-    network_domain: test_network
-    action: delete
-    block_id: 6288ab1c-0000-0000-0000-b8ca3a5d9ef8
+    count: 3
+    reuse_free: false
 '''
 
 RETURN = '''
-public_ip_block:
-    description: List of Dictionaries describing the public IP blocks.
-    returned: On success when I(action) is 'add'
-    type: dictionary
+addresses:
+    description: List of unalllocated public ips.
+    returned: On success.
+    type: list
     contains:
-      id:
-          description: Block ID.
-          type: string
-          sample: "8c787000-a000-4050-a215-280893411a7d"
-      addresses:
-          description: IP address.
-          type: list
-          sample: ['168.128.2.100', '168.128.2.101']
-      status:
-          description: Status of IP block.
-          type: string
-          sample: NORMAL
+      - description: IP address.
+        type: list
+        sample: ['168.128.2.100', '168.128.2.101']
 '''
 
 
-def public_ip_block_to_dict(block):
-    addresses = expand_ip_block(block)
-    return {'id': block.id, 'addresses': addresses, 'status': block.status}
-
-
-def add_public_ip_block(module, driver, network_domain):
+def allocate_public_ip_block(module, driver, network_domain):
     try:
-        block = driver.ex_add_public_ip_block_to_network_domain(network_domain)
-        module.exit_json(changed=True, msg="Success!",
-                         public_ip_block=public_ip_block_to_dict(block))
+        return driver.ex_add_public_ip_block_to_network_domain(network_domain)
     except DimensionDataAPIException as e:
-        module.fail_json(msg="Failed to add public IP block: %s" % str(e))
+        module.fail_json(msg="Failed to allocate public ip block:" +
+                             "%s" % e.message)
 
 
 def delete_public_ip_block(module, driver, network_domain, block_id=False,
                            base_ip=False):
-    # Get the block
-    block = get_public_ip_block(module, driver, network_domain, block_id,
-                                base_ip)
+
+    # Block ID given, try to use it.
+    if block_id is not 'False':
+        block = False
+        try:
+            block = driver.ex_get_public_ip_block(block_id)
+        except DimensionDataAPIException as e:
+            # 'UNEXPECTED_ERROR' should be removed once upstream bug is fixed.
+            # Currently any call to ex_get_public_ip_block where the block does
+            # not exist will return UNEXPECTED_ERROR rather than
+            # 'RESOURCE_NOT_FOUND'.
+            if e.code == "RESOURCE_NOT_FOUND" or e.code == 'UNEXPECTED_ERROR':
+                module.exit_json(changed=False, msg="Public IP Block does " +
+                                 "not exist")
+            else:
+                module.fail_json(msg="Unexpected error while retrieving " +
+                                     "block: %s" % e.code)
+    # Block ID not given, try to use base_ip.
+    else:
+        blocks = list_public_ip_blocks(module, driver, network_domain)
+        if blocks is not False:
+            block = filter(lambda x: x.base_ip == base_ip, blocks)[0]
+        else:
+            module.exit_json(changed=False, msg="IP block starting with " +
+                             "'%s' does not exist." % base_ip)
     # Now that we have the block, try to dselete it.
     if block is not False:
         try:
@@ -164,9 +148,6 @@ def main():
             region=dict(default='na', choices=dd_regions),
             network_domain=dict(required=True, type='str'),
             location=dict(required=True, type='str'),
-            base_ip=dict(default=False, type='str'),
-            block_id=dict(default=False, type='str'),
-            action=dict(required=True, choices=['get', 'add', 'delete']),
             count=dict(required=False, default=1, type='int'),
             reuse_free=dict(required=False, default=True, type='bool'),
             verify_ssl_cert=dict(required=False, default=True, type='bool')
@@ -185,10 +166,9 @@ def main():
     region = 'dd-%s' % module.params['region']
     network_domain = module.params['network_domain']
     location = module.params['location']
-    base_ip = module.params['base_ip']
-    block_id = module.params['block_id']
+    reuse_free = module.params['reuse_free']
+    count = module.params['count']
     verify_ssl_cert = module.params['verify_ssl_cert']
-    action = module.params['action']
 
     # Instantiate driver
     libcloud.security.VERIFY_SSL_CERT = verify_ssl_cert
@@ -197,19 +177,12 @@ def main():
 
     # get the network domain object
     network_domain_obj = get_network_domain(driver, network_domain, location)
-    if action == 'get':
-        block_dict = get_public_ip_block(driver, network_domain, block_id)
-        module.exit_json(changed=False,
-                         msg="Sucessfully retreived block details",
-                         public_ip_block=block_dict)
-    elif action == 'delete':
-        delete_public_ip_block(module, driver, network_domain_obj, block_id,
-                               base_ip)
-    elif action == 'add':
-        add_public_ip_block(module, driver, network_domain_obj)
-    else:
-        module.fail_json(msg="Unexpected action " +
-                             "'%s' is not 'delete' or 'add'" % action)
+    # Get addresses
+    res = get_unallocated_public_ips(module, driver, network_domain_obj,
+                                     reuse_free, count)
+    module.exit_json(changed=res['changed'], msg=res['msg'],
+                     addresses=res['addresses'])
+
 
 if __name__ == '__main__':
     main()

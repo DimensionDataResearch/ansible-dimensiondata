@@ -78,6 +78,10 @@ options:
         - Must be a valid IPv4 in dot-decimal notation (x.x.x.x).
     required: false
     default: None
+  provision_listener_ip_address:
+    description: Auto allocates a public IP address.
+    required: false
+    defauilt: true
   protocol:
     description:
         - Choice of %s.
@@ -157,25 +161,22 @@ load_balancer:
 '''
 
 
-def get_balancer(module, driver, name):
+def get_balancer(module, lb_driver, name):
     if is_uuid(name):
         try:
-            return driver.get_balancer(name)
+            return lb_driver.get_balancer(name)
         except DimensionDataAPIException as e:
             if e.code == 'RESOURCE_NOT_FOUND':
                 return False
             else:
                 module.fail_json("Unexpected API error code: %s" % e.code)
     else:
-        try:
-            balancers = driver.list_balancers()
-        except DimensionDataAPIException as e:
-            module.fail_json(msg="Error while listing balancers.")
+        balancers = list_balancers(module, lb_driver)
         found_balancers = filter(lambda x: x.name == name, balancers)
         if len(found_balancers) > 0:
             lb_id = found_balancers[0].id
             try:
-                return driver.get_balancer(found_balancers[0].id)
+                return lb_driver.get_balancer(found_balancers[0].id)
             except DimensionDataAPIException as e:
                 module.fail_json(msg="Unexpected error while retrieving load" +
                                  " balancer details with id %s" % lb_id)
@@ -194,6 +195,31 @@ def balancer_obj_to_dict(lb_obj):
     }
 
 
+def create_balancer(module, lb_driver, cp_driver, network_domain):
+    # Build mebers list
+    members_list = [Member(m['name'], m['ip'], m.get('port'))
+                    for m in module.params['members']]
+    if module.params['provision_listener_ip_address'] is True:
+        # Get addresses
+        res = get_unallocated_public_ips(module, cp_driver, lb_driver,
+                                         network_domain, True, 1)
+        listener_ip_address = res['addresses'][0]
+    else:
+        listener_ip_address = module.params['listener_ip_address']
+    try:
+        balancer = lb_driver.create_balancer(
+            module.params['name'],
+            module.params['port'],
+            module.params['protocol'],
+            getattr(Algorithm, module.params['algorithm']),
+            members_list,
+            ex_listener_ip_address=listener_ip_address)
+        module.exit_json(changed=True, msg="Success.",
+                         load_balancer=balancer_obj_to_dict(balancer))
+    except DimensionDataAPIException as e:
+        module.fail_json(msg="Error while creating load balancer: %s" % e)
+
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -208,8 +234,12 @@ def main():
             members=dict(default=None, type='list'),
             ensure=dict(default='present', choices=['present', 'absent']),
             verify_ssl_cert=dict(required=False, default=True, type='bool'),
-            listener_ip_address=dict(required=False, default=None, type='str')
-        )
+            listener_ip_address=dict(required=False, default=None, type='str'),
+            provision_listener_ip_address=dict(required=False, default=True,
+                                               type='bool')
+        ),
+        mutually_exclusive=(["listener_ip_address",
+                             "provision_listener_ip_address"])
     )
 
     if not HAS_LIBCLOUD:
@@ -225,13 +255,8 @@ def main():
     location = module.params['location']
     network_domain = module.params['network_domain']
     name = module.params['name']
-    port = module.params['port']
-    protocol = module.params['protocol']
-    algorithm = module.params['algorithm']
-    members = module.params['members']
     verify_ssl_cert = module.params['verify_ssl_cert']
     ensure = module.params['ensure']
-    listener_ip_address = module.params['listener_ip_address']
 
     # -------------------
     # Instantiate drivers
@@ -259,23 +284,7 @@ def main():
     if ensure == 'present':
         balancer = get_balancer(module, lb_driver, name)
         if balancer is False:
-            # Build mebers list
-            members_list = [Member(m['name'], m['ip'], m.get('port'))
-                            for m in members]
-            # Create load balancer
-            try:
-                balancer = lb_driver.create_balancer(
-                    name,
-                    port,
-                    protocol,
-                    getattr(Algorithm, algorithm),
-                    members_list,
-                    ex_listener_ip_address=listener_ip_address)
-                module.exit_json(changed=True, msg="Success.",
-                                 load_balancer=balancer_obj_to_dict(balancer))
-            except DimensionDataAPIException as e:
-                module.fail_json(msg="Error while creating load balancer: %s" %
-                                 e)
+            create_balancer(module, lb_driver, cp_driver, net_domain)
         else:
             module.exit_json(changed=False, msg="Load balancer already " +
                              "exists.", load_balancer=balancer_obj_to_dict(
