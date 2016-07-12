@@ -38,8 +38,11 @@ options:
   region:
     description:
       - The target region.
-    choices: %s
-    default: na
+    choices:
+      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
+      - Note: Values avail in array dd_regions(). 
+    default: na aka North America
   speed:
     description:
       - The speed of the disk.
@@ -48,7 +51,7 @@ options:
   size:
     description:
       - The size of the disk in GB
-      required: false
+    required: false
   scsi_id:
     description:
       - The scsi_id for the disk.  Which slot the disk should be in.
@@ -66,7 +69,7 @@ options:
   wait_timeout:
     description:
       - Only applicable if wait is true.
-        This is the amount of time in seconds to wait
+      - This is the amount of time in seconds to wait
     required: false
     default: 300
   wait_poll_interval:
@@ -77,7 +80,7 @@ options:
 
 author:
     - "Jeff Dunham (@jadunham1)"
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Note: These examples don't include authorization.

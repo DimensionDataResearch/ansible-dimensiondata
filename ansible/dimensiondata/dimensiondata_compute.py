@@ -25,8 +25,11 @@ options:
   region:
     description:
       - The target region.
-    choices: %s
-    default: na
+    choices:
+      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
+      - Note: Values avail in array dd_regions(). 
+    default: na aka North America
   ensure:
     description:
       - the state you want the hosts to be in.
@@ -48,15 +51,15 @@ options:
     aliases: []
   vlans:
     description:
-      - > List of names or IDs of the VLANs to connect to. They will be
-          connected in order specified.
+      - List of names or IDs of the VLANs to connect to.
+      - They will be connected in order specified.
     required: false
     default: null
     aliases: []
   ipv4_addresses:
     description:
-      - > List of IPv4 addresses to connect. Only one address per VLAN/Network
-          is allowed.
+      - List of IPv4 addresses to connect.
+      - Only one address per VLAN/Network is allowed.
     reqauired: false
     default: null
     aliases: []
@@ -100,18 +103,17 @@ options:
     aliases: []
   unique_names:
     description:
-      - > By default Dimension Data allows the same name for multiple servers
-          this will make sure we don't create a new server if the name
-          already exists.
+      - By default Dimension Data allows the same name for multiple servers.
+      - This will make sure we don't create a new server if the name already exists.
     required: false
     default: true
     aliases: []
     choices: [true, false]
   operate_on_multiple:
     description:
-      - > By default Dimension Data allows the same name for multiple servers
-          this will allow this module to operate on mulitple nodes/servers if
-          names are given instead of IDs. WARNING: This can be dangerous!!
+      - By default Dimension Data allows the same name for multiple servers.
+      - This will allow this module to operate on mulitple nodes/servers if names are given instead of IDs.
+      - WARNING: This can be dangerous!!
     required: false
     default: false
     aliases: []
@@ -128,8 +130,7 @@ options:
     default: false
   wait_time:
     description:
-      - > Only applicable if wait is true. This is the amount of time in
-          seconds to wait.
+      - Only applicable if wait is true. This is the amount of time in seconds to wait.
     required: false
     default: 600
   wait_poll_interval:
@@ -141,7 +142,7 @@ options:
 author:
     - "Jeff Dunham (@jadunham1)"
     - "Aimon Bustardo (@aimonb)"
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Note: These examples don't include authorization.

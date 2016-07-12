@@ -1,0 +1,26 @@
+---
+
+- name: create local markdown doc
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    heading: 'Dimension Data Ansible Modules'
+    subheading: 'Local copy of files modules'
+    requirements:
+      - See official Ansible docs
+
+  tasks:
+    - name: delete output doc file if it exists
+      file: path="{{ output_file }}" state=absent
+
+    - name: get docs and examples for modules
+      ansible_docstring: path="{{ code_path }}"
+      register: modules
+
+    - name: build web/markdown ansible docs
+      template: src={{ansible_webdocs }}/../templates/ansible-docs.j2 dest={{ output_file }}
+
+    - debug: msg="Just build new webdocs at {{ output_file }}"
+

@@ -36,17 +36,19 @@ dd_regions = get_dd_regions()
 DOCUMENTATION = '''
 ---
 module: dimensiondata_get_unallocated_public_ips
-short_description:
-    - > Get specified number of free addresses,
-        provision to reach requested number.
+short_description: Get specified number of free addresses; provision to reach requested number.
+description: Get specified number of free addresses; provision to reach requested number.
 version_added: '2.1'
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
-    choices: %s
-    default: na
+    choices:
+      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py
+      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
+      - Note: Values avail in array dd_regions().
+    default: na aka North America
   network_domain:
     description:
       - The target network.
@@ -68,7 +70,7 @@ options:
       - Check that SSL certificate is valid.
     required: false
     default: true
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Get 3 unallocated/free public IPs, reuse existing free.

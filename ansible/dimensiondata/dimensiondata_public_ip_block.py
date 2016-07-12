@@ -36,8 +36,10 @@ dd_regions = get_dd_regions()
 DOCUMENTATION = '''
 ---
 module: dimensiondata_public_ip_block
-short_description:
-    - Create, delete and list public IP blocks.
+short_description: Create, delete and list public IP blocks.
+description:
+  - Get specified number of free addresses;
+  - Provision to reach requested number.
 version_added: '2.1'
 author: 'Aimon Bustardo (@aimonb)'
 options:

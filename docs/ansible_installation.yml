@@ -1,0 +1,11 @@
+---
+
+- name: Install support for regeneration of README markdown file
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: clone the appropriate git repository
+      git: clone=yes dest=./ansible-webdocs force=no repo=git@github.com:jedelman8/ansible-webdocs.git
+

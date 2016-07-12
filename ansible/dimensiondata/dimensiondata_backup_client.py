@@ -14,7 +14,7 @@ dd_regions = get_dd_regions()
 
 DOCUMENTATION = '''
 ---
-module: dimensiondata_backup
+module: dimensiondata_backup client
 short_description: add/delete backup client for a host
 description:
     - Add or delete a backup client for a host in the Dimension Data Cloud
@@ -35,8 +35,11 @@ options:
   region:
     description:
       - The target region.
-    choices: %s
-    default: na
+    choices:
+      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
+      - Note: Values avail in array dd_regions(). 
+    default: na aka North America
   client_type:
     description:
       - The service plan for backups.
@@ -65,7 +68,7 @@ options:
     choices: [ON_FAILURE, ON_SUCCESS]
 author:
     - "Jeff Dunham (@jadunham1)"
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Note: These examples don't include authorization.

@@ -41,7 +41,8 @@ dd_regions = get_dd_regions()
 DOCUMENTATION = '''
 ---
 module: dimensiondata_firewall
-short_description:
+short_description: Create, update, and delete MCP 2.0 firewall rules.
+description:
     - Create, update, and delete MCP 2.0 firewall rules.
     - Requires MCP 2.0.
 version_added: '2.1'
@@ -50,8 +51,11 @@ options:
   region:
     description:
       - The target region.
-    choices: %s
-    default: na
+    choices:
+      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
+      - Note: Values avail in array dd_regions(). 
+    default: na aka North America
   location:
     description:
       - The target datacenter.
@@ -119,7 +123,7 @@ options:
     description:
       - Check that SSL certificate is valid.
     default: true
-''' % str(dd_regions)
+''' %
 
 EXAMPLES = '''
 # Create and enable an IPv4 single port TCP allow rule to single destination:
