@@ -1,0 +1,29 @@
+Cloud Modules
+`````````````
+
+.. toctree:: :maxdepth: 1
+
+
+Dimensiondata
+-------------
+
+.. toctree:: :maxdepth: 1
+
+  dimensiondata_backup (E) - Enable or Disable backups for a host. <dimensiondata_backup_module>
+  dimensiondata_backup_client (E) - add/delete backup client for a host <dimensiondata_backup_client_module>
+  dimensiondata_compute (E) - create, terminate, start or stop an server in dimensiondata <dimensiondata_compute_module>
+  dimensiondata_disk (E) - Add/Remove/Modify Disks <dimensiondata_disk_module>
+  dimensiondata_firewall (E) - Create, update, and delete MCP 2.0 firewall rules. <dimensiondata_firewall_module>
+  dimensiondata_get_unallocated_public_ips (E) - Get specified number of free addresses. <dimensiondata_get_unallocated_public_ips_module>
+  dimensiondata_load_balancer (E) - Create, update or delete load balancers. <dimensiondata_load_balancer_module>
+  dimensiondata_nat_rule (E) - Create, List, Get or Delete NAT rules. <dimensiondata_nat_rule_module>
+  dimensiondata_network (E) - Create, update, and delete MCP 1.0 & 2.0 networks <dimensiondata_network_module>
+  dimensiondata_public_ip_block (E) - Create, delete and list public IP blocks. <dimensiondata_public_ip_block_module>
+  dimensiondata_vlan (E) - Create, Read, Update or Delete VLANs. <dimensiondata_vlan_module>
+
+
+
+.. note::
+    -  (D): This marks a module as deprecated, which means a module is kept for backwards compatibility but usage is discouraged.  The module documentation details page may explain more about this rationale.
+    -  (E): This marks a module as 'extras', which means it ships with ansible but may be a newer module and possibly (but not necessarily) less actively maintained than 'core' modules.
+    - Tickets filed on modules are filed to different repos than those on the main open source project. Core module tickets should be filed at `ansible/ansible-modules-core on GitHub <http://github.com/ansible/ansible-modules-core>`_, extras tickets to `ansible/ansible-modules-extras on GitHub <http://github.com/ansible/ansible-modules-extras>`_

@@ -1,0 +1,223 @@
+.. _dimensiondata_load_balancer:
+
+
+dimensiondata_load_balancer - Create, update or delete load balancers.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Create, update or delete load balancers.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>algorithm<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ROUND_ROBIN</td>
+        <td><ul><li>ROUND_ROBIN</li><li>LEAST_CONNECTIONS</li><li>SHORTEST_RESPONSE</li><li>PERSISTENT_IP</li></ul></td>
+        <td><div>Choice of an enumerations of algorithms</div></td></tr>
+            <tr>
+    <td>ensure<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li></ul></td>
+        <td><div>present, absent.</div></td></tr>
+            <tr>
+    <td>listener_ip_address<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>None</td>
+        <td><ul></ul></td>
+        <td><div>Must be a valid IPv4 in dot-decimal notation (x.x.x.x).</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>members<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>List of members as dictionaries.</div><div>See Examples for format.</div></td></tr>
+            <tr>
+    <td>name<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Name of the Load Balancer.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target network name or ID.</div></td></tr>
+            <tr>
+    <td>port<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>None</td>
+        <td><ul></ul></td>
+        <td><div>An integer in the range of 1-65535.</div><div>If not supplied, it will be taken to mean "Any Port"</div></td></tr>
+            <tr>
+    <td>protocol<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>http</td>
+        <td><ul><li>any</li><li>tcp</li><li>udp</li><li>http</li><li>ftp</li><li>smtp</li></ul></td>
+        <td><div>Choice of an enumeration of protocols</div></td></tr>
+            <tr>
+    <td>provision_listener_ip_address<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Auto allocates a public IP address.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Construct Load Balancer
+    - dimensiondata_load_balancer:
+        region: na
+        location: NA5
+        network_domain: test_network
+        name: web_lb01
+        port: 80
+        protocol: http
+        algorith: ROUND_ROBIN
+        members:
+            - name: webserver1
+              port: 8080
+              ip: 192.160.0.11
+            - name: webserver3
+              port: 8080
+              ip: 192.160.0.13
+        ensure: present
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> load_balancer </td>
+        <td> Dictionary describing the Load Balancer. </td>
+        <td align=center> On success when I(ensure) is 'present' </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> ip </td>
+        <td> Listen VIP of Load Balancer. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 168.128.1.1 </td>
+        </tr>
+                <tr>
+        <td> ensure </td>
+        <td> Virtual Listener ensure. </td>
+        <td align=center>  </td>
+        <td align=center> integer </td>
+        <td align=center> 0 </td>
+        </tr>
+                <tr>
+        <td> port </td>
+        <td> Port of Load Balancer listener. </td>
+        <td align=center>  </td>
+        <td align=center> integer </td>
+        <td align=center> 80 </td>
+        </tr>
+                <tr>
+        <td> name </td>
+        <td> Virtual Listener name. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> My Virtual Listener </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> Load Balancer ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> aaaaa000-a000-4050-a215-2808934ccccc </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

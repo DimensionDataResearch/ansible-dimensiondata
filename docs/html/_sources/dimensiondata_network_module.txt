@@ -1,0 +1,225 @@
+.. _dimensiondata_network:
+
+
+dimensiondata_network - Create, update, and delete MCP 1.0 & 2.0 networks
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Create, update, and delete MCP 1.0 & 2.0 networks
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>description<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Additional description of the network domain.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>name<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The name of the network domain to create.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>service_plan<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ADVANCED</td>
+        <td><ul><li>ESSENTIALS</li><li>ADVANCED</li></ul></td>
+        <td><div>The service plan, either “ESSENTIALS” or “ADVANCED”.</div><div>MCP 2.0 Only.</div></td></tr>
+            <tr>
+    <td>state<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li></ul></td>
+        <td><div>Should the resource be present or absent.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+            <tr>
+    <td>wait<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Should we wait for the task to complete before moving onto the next.</div></td></tr>
+            <tr>
+    <td>wait_poll_interval<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>2</td>
+        <td><ul></ul></td>
+        <td><div>The amount to time inbetween polling for task completion</div></td></tr>
+            <tr>
+    <td>wait_time<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>600</td>
+        <td><ul></ul></td>
+        <td><div>Only applicable if wait is true. This is the amount of time in seconds to wait</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Create an MCP 1.0 network
+    - dimensiondata_network:
+        region: na
+        location: NA5
+        name: mynet
+    # Create an MCP 2.0 network
+    - dimensiondata_network:
+        region: na
+        location: NA9
+        name: mynet
+        service_plan: ADVANCED
+    # Delete a network
+    - dimensiondata_network:
+        region: na
+        location: NA1
+        name: mynet
+        state: absent
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> network </td>
+        <td> Dictionary describing the network. </td>
+        <td align=center> On success when I(state) is 'present' </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> status </td>
+        <td> Network status. (MCP 2.0 only) </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NORMAL </td>
+        </tr>
+                <tr>
+        <td> multicast </td>
+        <td> Multicast enabled? (MCP 1.0 only) </td>
+        <td align=center>  </td>
+        <td align=center> boolean </td>
+        <td align=center> False </td>
+        </tr>
+                <tr>
+        <td> description </td>
+        <td> Network description. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> My network description </td>
+        </tr>
+                <tr>
+        <td> private_net </td>
+        <td> Private network subnet. (MCP 1.0 only) </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 10.2.3.0 </td>
+        </tr>
+                <tr>
+        <td> name </td>
+        <td> Network name. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> My network </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> Network ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 8c787000-a000-4050-a215-280893411a7d </td>
+        </tr>
+                <tr>
+        <td> location </td>
+        <td> Datacenter location. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NA3 </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

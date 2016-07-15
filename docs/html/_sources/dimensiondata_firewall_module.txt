@@ -1,0 +1,284 @@
+.. _dimensiondata_firewall:
+
+
+dimensiondata_firewall - Create, update, and delete MCP 2.0 firewall rules.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Create, update, and delete MCP 2.0 firewall rules.
+Requires MCP 2.0.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>action<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>Accept</td>
+        <td><ul><li>ACCEPT_DECISIVELY</li><li>DROP</li></ul></td>
+        <td><div>Action to take when rule matched.</div><div>ACCEPT_DECISIVELY or DROP</div></td></tr>
+            <tr>
+    <td>destination<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ANY</td>
+        <td><ul></ul></td>
+        <td><div>Destination host IP or subnet as CIDR.</div></td></tr>
+            <tr>
+    <td>destination_port<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ANY</td>
+        <td><ul></ul></td>
+        <td><div>Destination ANY, single port or port range.</div></td></tr>
+            <tr>
+    <td>ip_version<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>IPv4</td>
+        <td><ul><li>IPv4</li><li>IPv6</li></ul></td>
+        <td><div>IPv4 or IPv6.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>name<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Firewall rule name.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target network.</div></td></tr>
+            <tr>
+    <td>position<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>last</td>
+        <td><ul></ul></td>
+        <td><div>Placement of rule in relation to others.</div><div>One of FIRST, LAST, BEFORE, AFTER.</div></td></tr>
+            <tr>
+    <td>protocol<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>TCP</td>
+        <td><ul><li>IP</li><li>ICMP</li><li>TCP</li><li>UDP</li></ul></td>
+        <td><div>Network protocol type.</div><div>IP, ICMP, TCP, or UDP.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>relative_to_rule<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>BEFORE or AFTER this rule.</div><div>Required when position is BEFORE or AFTER.</div></td></tr>
+            <tr>
+    <td>source<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ANY</td>
+        <td><ul></ul></td>
+        <td><div>Source host IP or subnet as CIDR.</div></td></tr>
+            <tr>
+    <td>source_port<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>ANY</td>
+        <td><ul></ul></td>
+        <td><div>Source ANY, single port or port range.</div></td></tr>
+            <tr>
+    <td>state<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li><li>enabled</li><li>disabled</li></ul></td>
+        <td><div>State the resource should be in - present, absent, enabled, disabled.</div><div>If enabled or present given and rule does not exist, rule will be created and enabled.</div><div>If disabled given and rule does not exist, rule will be created and disabled.</div><div>If absent given, rule will be deleted.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Create and enable an IPv4 single port TCP allow rule to single destination:
+    - dimensiondata_firewall:
+        region: na
+        location: NA5
+        network_domain: MyNet1
+        name: Allow_HTTPs
+        action:  ACCEPT_DECISIVELY
+        protocol: TCP
+        destination: 10.1.2.3
+        destination_port: 443
+    # Delete a rule:
+    - dimensiondata_firewall:
+        region: na
+        location: NA5
+        network_domain: MyNet1
+        name: Allow HTTPs
+        state: absent
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> firewall_rule </td>
+        <td> Dictionary describing the firewall rule. </td>
+        <td align=center> On success when I(state) is 'present' </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> status </td>
+        <td> Rule state. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> enabled </td>
+        </tr>
+                <tr>
+        <td> protocol </td>
+        <td> Network protocol. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> TCP </td>
+        </tr>
+                <tr>
+        <td> name </td>
+        <td> Rule name. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> Allow HTTPs to Web Servers </td>
+        </tr>
+                <tr>
+        <td> destination </td>
+        <td> Destination rule attributes. </td>
+        <td align=center>  </td>
+        <td align=center> dictionary </td>
+        <td align=center> {'ip_prefix_size': {'sample': 32, 'type': 'integer', 'description': 'Subnet mask as integer.'}, 'any_ip': {'sample': 'ANY', 'type': 'string', 'description': 'Set if address is ANY.'}, 'port_end': {'sample': 443, 'type': 'integer', 'description': 'End port.'}, 'ip_address': {'sample': '10.23.253.253', 'type': 'string', 'description': 'IP address.'}, 'port_begin': {'sample': 443, 'type': 'integer', 'description': 'Start port.'}} </td>
+        </tr>
+                <tr>
+        <td> enabled </td>
+        <td> Rule state. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> True </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> Rule ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 8c787000-a000-4050-a215-280893411a7d </td>
+        </tr>
+                <tr>
+        <td> source </td>
+        <td> Source rule attributes. </td>
+        <td align=center>  </td>
+        <td align=center> dictionary </td>
+        <td align=center> {'ip_prefix_size': {'sample': 32, 'type': 'integer', 'description': 'Subnet mask as integer.'}, 'any_ip': {'sample': 'ANY', 'type': 'string', 'description': 'Set if address is ANY.'}, 'port_end': {'sample': None, 'type': 'string', 'description': 'End port.'}, 'ip_address': {'sample': '4.2.2.250', 'type': 'string', 'description': 'IP address.'}, 'port_begin': {'sample': None, 'type': 'string', 'description': 'Start port.'}} </td>
+        </tr>
+                <tr>
+        <td> location </td>
+        <td> Datacenter location code. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NA12 </td>
+        </tr>
+                <tr>
+        <td> ip_version </td>
+        <td> IP version. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> IPv4 </td>
+        </tr>
+                <tr>
+        <td> network_domain </td>
+        <td> Network name. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> MyNet1 </td>
+        </tr>
+                <tr>
+        <td> action </td>
+        <td> Rule action. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> ACCEPT_DECISIVELY </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

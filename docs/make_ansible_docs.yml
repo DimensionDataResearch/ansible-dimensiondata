@@ -1,0 +1,124 @@
+---
+
+- name: create Dimension Data html documenation files
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    ansible_dir: './ansible_for_docs'
+    docsite_dir: './ansible_for_docs/docsite'
+    rst_dir: './ansible_for_docs/docsite/rst'
+    temp_rst_dir: './ansible_for_docs/docsite/rst/temp'
+    temp_html_dir: './ansible_for_docs/docsite/rst/temp/_build/html/'
+    local_html_dir: './html'
+    modules_dir: './ansible_for_docs/modules'
+    lib_ansible_dir: './ansible_for_docs/lib/ansible'
+    core_dir: './ansible_for_docs/lib/ansible/modules/core'
+    extras_dir: './ansible_for_docs/lib/ansible/modules/extras'
+    cloud_dir: './ansible_for_docs/lib/ansible/modules/extras/cloud'
+    sym_link: './ansible_for_docs/lib/ansible/modules/extras/cloud/dimensiondata'
+
+    files_to_del: [ "{{ modules_dir }}/__init__.py", 
+                    "{{ lib_ansible_dir }}/__init__.py", 
+                    "{{ lib_ansible_dir }}/constants.py", 
+                    "{{ lib_ansible_dir }}/release.py", 
+                    "{{ core_dir }}/__init__.py", 
+                    "{{ extras_dir }}/__init__.py", 
+                    "{{ cloud_dir }}/__init__.py", 
+                    "{{ cloud_dir }}/xenserver_facts.py" ]
+
+  tasks:
+
+    # use the existence (or non existence) of this ansible dir as a "flag"
+    # that "one time installation" things have been done
+    #
+    - name: determine if ansible subdir exists
+      stat: path="{{ ansible_dir }}"
+      register: ans_exist
+
+    - name: install sphinx
+      pip: name=sphinx
+      when: ans_exist.stat.exists == False
+
+    - name: clone the appropriate git repository
+      git: clone=yes dest="{{ ansible_dir }}" force=no repo=git@github.com:ansible/ansible.git
+      when: ans_exist.stat.exists == False
+
+    - name: remove the sym link
+      file: path="{{ sym_link }}" state=absent
+      when: ans_exist.stat.exists == False
+
+    - name: set link to dimension data files
+      file: dest="{{ sym_link }}" src=../../../../../../../ansible/dimensiondata state=link
+      when: ans_exist.stat.exists == False
+
+    - name: delete some random files
+      file: path="{{ item }}" state=absent 
+      with_items: "{{ files_to_del }}"
+      when: ans_exist.stat.exists == False
+
+    - name: find and delete dirs
+      shell: cd {{ cloud_dir }}; find . -maxdepth 1 -type d ! -name "dimensiondata" -exec rm -rf {} 2> /dev/null \;
+      ignore_errors: yes
+      when: ans_exist.stat.exists == False
+
+    - name: find and delete dirs
+      shell: cd {{ extras_dir }}; find . -maxdepth 1 -type d ! -name "cloud" -type d -exec rm -rf {} 2> /dev/null \;
+      ignore_errors: yes
+      when: ans_exist.stat.exists == False
+
+    - name: find and delete dirs
+      shell: cd {{ lib_ansible_dir }}; find . -maxdepth 1 -type d ! -name "modules" -exec rm -rf {} 2> /dev/null \;
+      ignore_errors: yes
+      when: ans_exist.stat.exists == False
+
+    - name: find and delete dirs
+      shell: cd {{ core_dir }}; find . -maxdepth 1 -type d -exec rm -rf {} 2> /dev/null \;
+      ignore_errors: yes
+      when: ans_exist.stat.exists == False
+
+    # end of one time installation issues
+
+    - name: delete temp dirs
+      file: path="{{ item }}" state=absent
+      with_items:
+        - "{{ temp_rst_dir }}"
+        - "{{ temp_html_dir }}"
+        - "{{ local_html_dir }}"
+
+    - name: make the rst files
+      shell: 'make modules' 
+      args:
+        chdir: "{{ docsite_dir }}"
+
+    - name: create temp dir to hold the dimension data rst files
+      file: path="{{ temp_rst_dir }}" state=directory mode=0755
+
+    - name: list files to copy
+      shell: ls -1 {{ rst_dir }} | grep dimensiondata
+      register: files_to_copy
+
+    - name: copy the dimension data files
+      copy: src="{{ rst_dir }}/{{ item }}" dest="{{ temp_rst_dir }}"
+      with_items: "{{ files_to_copy.stdout_lines }}"
+
+    - name: copy over the index file and rename it
+      copy: src="{{ rst_dir }}/list_of_cloud_modules.rst" dest="{{ temp_rst_dir }}/index.rst"
+
+    - name: copy over the makefile
+      copy: src="./sphinx_Makefile" dest="{{ temp_rst_dir }}/Makefile" mode=0644
+
+    - name: copy over the conf.py
+      copy: src="./sphinx_conf.py" dest="{{ temp_rst_dir }}/conf.py" mode=0644
+
+    - name: make the html files
+      shell: 'make html' 
+      args:
+        chdir: "{{ temp_rst_dir }}"
+
+    - name: copy over the generated html dir
+      synchronize:
+        src:        "{{ temp_rst_dir }}/build/html/"
+        dest:       "./html"
+

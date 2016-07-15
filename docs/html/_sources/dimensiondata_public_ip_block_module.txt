@@ -1,0 +1,195 @@
+.. _dimensiondata_public_ip_block:
+
+
+dimensiondata_public_ip_block - Create, delete and list public IP blocks.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Get specified number of free addresses;
+Provision to reach requested number.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>action<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul><li>get</li><li>get_free</li><li>add</li><li>delete</li></ul></td>
+        <td><div>Get, add or delete public IP blocks,</div></td></tr>
+            <tr>
+    <td>base_ip<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The first IP of the newtork block.</div><div>This or block_id Required when releasing existing block.</div></td></tr>
+            <tr>
+    <td>block_id<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The first IP of the newtork block.</div><div>This or base_ip is required when releasing existing block.</div></td></tr>
+            <tr>
+    <td>count<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>1</td>
+        <td><ul></ul></td>
+        <td><div>Number of public IPs needed.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target network.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>reuse_free<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>If true existing free IPs will be used to fufill count.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Add public IP block
+    - dimensiondata_public_ip_block:
+        region: na
+        location: NA5
+        network_domain: test_network
+        action: add
+    # Delete public IP Block by base IP.
+    - dimensiondata_public_ip_block:
+        region: na
+        location: NA5
+        network_domain: test_network
+        action: delete
+        base_ip: 168.128.2.100
+    # Delete public IP Block by block ID.
+    - dimensiondata_public_ip_block:
+        region: na
+        location: NA5
+        network_domain: test_network
+        action: delete
+        block_id: 6288ab1c-0000-0000-0000-b8ca3a5d9ef8
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> public_ip_block </td>
+        <td> List of Dictionaries describing the public IP blocks. </td>
+        <td align=center> On success when I(action) is 'add' </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> status </td>
+        <td> Status of IP block. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NORMAL </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> Block ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 8c787000-a000-4050-a215-280893411a7d </td>
+        </tr>
+                <tr>
+        <td> addresses </td>
+        <td> IP address. </td>
+        <td align=center>  </td>
+        <td align=center> list </td>
+        <td align=center> ['168.128.2.100', '168.128.2.101'] </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

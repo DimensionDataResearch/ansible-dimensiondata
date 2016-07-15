@@ -42,7 +42,7 @@ options:
       - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
       - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
       - Note: Values avail in array dd_regions(). 
-    default: na aka North America
+    default: 'na' (North America)
   speed:
     description:
       - The speed of the disk.

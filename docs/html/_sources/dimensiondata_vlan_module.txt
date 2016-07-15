@@ -1,0 +1,258 @@
+.. _dimensiondata_vlan:
+
+
+dimensiondata_vlan - Create, Read, Update or Delete VLANs.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Create, Read, Update or Delete VLANs.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>action<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>create</td>
+        <td><ul><li>create</li><li>read</li><li>get</li><li>update</li><li>delete</li><li>expand</li></ul></td>
+        <td><div>create, read(get), update or delete.</div></td></tr>
+            <tr>
+    <td>description<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Additional description of the VLAN.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>name<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The name of the VLAN.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target network.</div></td></tr>
+            <tr>
+    <td>private_ipv4_base_address<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The base IPv4 address e.g. 192.168.1.0.</div></td></tr>
+            <tr>
+    <td>private_ipv4_prefix_size<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The size of the IPv4 address space, e.g 24.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+            <tr>
+    <td>vlan_id<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The VLAN ID, required for update action.</div></td></tr>
+            <tr>
+    <td>wait<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Should we wait for the task to complete before moving onto the next.</div></td></tr>
+            <tr>
+    <td>wait_poll_interval<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>2</td>
+        <td><ul></ul></td>
+        <td><div>The amount to time inbetween polling for task completion</div></td></tr>
+            <tr>
+    <td>wait_time<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>600</td>
+        <td><ul></ul></td>
+        <td><div>Only applicable if wait is true. This is the amount of time in seconds to wait</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Add VLAN
+    - dimensiondata_vlan:
+        region: na
+        location: NA5
+        network_domain: test_network
+        name: my_vlan1
+        description: A test VLAN'd Network.
+        private_ipv4_base_address: 192.168.23.0
+        private_ipv4_prefix_size: 24
+        action: create
+        wait: yes
+    # Read/Get a VLAN details
+    - dimensiondata_vlan:
+        region: na
+        location: NA5
+        network_domain: test_network
+        name: my_vlan1
+        action: read
+        wait: yes
+    # Update a VLAN
+    # VLAN ID is required to modify a VLAN.
+    - dimensiondata_vlan:
+        region: na
+        location: NA5
+        network_domain: test_network
+        vlan_id: a2c6cccc-bbbb-aaaa-0000-000028bcc47c
+        name: my_vlan_1
+        description: A test VLAN network, renamed.
+        state: present
+        wait: yes
+    # Delete a VLAN by name
+    - dimensiondata_vlan:
+        region: na
+        location: NA5
+        network_domain: test_network
+        name: my_vlan_1
+        action: delete
+        wait: no
+    # Delete a VLAN by ID
+    - dimensiondata_vlan:
+        region: na
+        location: NA5
+        network_domain: test_network
+        vlan_id: a2c6cccc-bbbb-aaaa-0000-000028bcc47c
+        action: delete
+        wait: no
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> vlan </td>
+        <td> Dictionary describing the VLAN. </td>
+        <td align=center> On success when I(state) is 'present' </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> status </td>
+        <td> VLAN status. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NORMAL </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> VLAN ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> aaaaa000-a000-4050-a215-2808934ccccc </td>
+        </tr>
+                <tr>
+        <td> description </td>
+        <td> VLAN description. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> My VLAN description </td>
+        </tr>
+                <tr>
+        <td> name </td>
+        <td> VLAN name. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> My VLAN </td>
+        </tr>
+                <tr>
+        <td> location </td>
+        <td> Datacenter location. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NA3 </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

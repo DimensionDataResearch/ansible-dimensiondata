@@ -1,0 +1,176 @@
+.. _dimensiondata_disk:
+
+
+dimensiondata_disk - Add/Remove/Modify Disks
+++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 1.9
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Add/Remove/Modify disks for a host in the Dimension Data Cloud.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>node_ids<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>A list of server ids to work on.</div></br>
+        <div style="font-size: small;">aliases: server_id, server_ids, node_id<div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>scsi_id<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The scsi_id for the disk.  Which slot the disk should be in.</div></td></tr>
+            <tr>
+    <td>size<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The size of the disk in GB</div></td></tr>
+            <tr>
+    <td>speed<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>STANDARD</td>
+        <td><ul><li>STANDARD</li><li>ECONOMY</li><li>HIGHPERFORMANCE</li></ul></td>
+        <td><div>The speed of the disk.</div></td></tr>
+            <tr>
+    <td>state<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li></ul></td>
+        <td><div>The state you want the hosts to be in.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+            <tr>
+    <td>wait<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Should we wait for the task to complete before moving onto the next.</div></td></tr>
+            <tr>
+    <td>wait_poll_interval<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>2</td>
+        <td><ul></ul></td>
+        <td><div>The amount to time inbetween polling for task completion</div></td></tr>
+            <tr>
+    <td>wait_timeout<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>300</td>
+        <td><ul></ul></td>
+        <td><div>Only applicable if wait is true.</div><div>This is the amount of time in seconds to wait</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Note: These examples don't include authorization.
+    # You can set these by exporting DIDATA_USER and DIDATA_PASSWORD vars:
+    # export DIDATA_USER=<username>
+    # export DIDATA_PASSWORD=<password>
+    
+    # Add a disk to slot 3 that is 40GB and ECONOMY speed
+    
+    - dimensiondata_disk:
+        node_ids:
+          - '7ee719e9-7ae9-480b-9f16-c6b5de03463c'
+        state: present
+        scsi_id: 3
+        size: 40
+        speed: ECONOMY
+    
+    # Modify a disk in slot 3 and wait for it to finish before returning success
+    
+    - dimensiondata_disk:
+        node_ids:
+          - '7ee719e9-7ae9-480b-9f16-c6b5de03463c'
+        state: present
+        scsi_id: 3
+        size: 45
+        speed: HIGHSPEED
+    
+    # Remove a disk in slot 3
+    - dimensiondata_disk:
+        node_ids:
+          - '7ee719e9-7ae9-480b-9f16-c6b5de03463c'
+        state: absent
+        scsi_id: 3
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> servers </td>
+        <td> List of servers this worked on. </td>
+        <td align=center> Always </td>
+        <td align=center> list </td>
+        <td align=center>  </td>
+    </tr>
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

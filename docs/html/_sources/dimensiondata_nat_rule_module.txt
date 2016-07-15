@@ -1,0 +1,191 @@
+.. _dimensiondata_nat:
+
+
+dimensiondata_nat - Create, List, Get or Delete NAT rules.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 2.1
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Create, List, Get or Delete NAT rules.
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>action<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li></ul></td>
+        <td><div>present, absent</div></td></tr>
+            <tr>
+    <td>external_ip<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The public/external IPv4 address.</div></td></tr>
+            <tr>
+    <td>internal_ip<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The Internal IPv4 address.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target network name or ID.</div></td></tr>
+            <tr>
+    <td>provision_external_ip<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Auto allocates a public IP address.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Create NAT rule.
+    - dimensiondata_load_balancer:
+        region: na
+        location: NA12
+        network_domain: test_network
+        internal_ip: 10.0.0.45
+        external_ip: 162.24.32.3
+        ensure: present
+    # delete NAT rule.
+    - dimensiondata_load_balancer:
+        region: na
+        location: NA12
+        network_domain: test_network
+        internal_ip: 10.0.0.45
+        external_ip: 162.24.32.3
+        ensure: absent
+
+Return Values
+-------------
+
+Common return values are documented here :doc:`common_return_values`, the following are the fields unique to this module:
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">name</th>
+    <th class="head">description</th>
+    <th class="head">returned</th>
+    <th class="head">type</th>
+    <th class="head">sample</th>
+    </tr>
+
+        <tr>
+        <td> nat_rule </td>
+        <td> Dictionary describing the NAT rule. </td>
+        <td align=center> On success when I(action) is 'present'. </td>
+        <td align=center> dictionary </td>
+        <td align=center>  </td>
+    </tr>
+        <tr><td>contains: </td>
+    <td colspan=4>
+        <table border=1 cellpadding=2>
+        <tr>
+        <th class="head">name</th>
+        <th class="head">description</th>
+        <th class="head">returned</th>
+        <th class="head">type</th>
+        <th class="head">sample</th>
+        </tr>
+
+                <tr>
+        <td> external_ip </td>
+        <td> External/public IP. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 162.24.32.3 </td>
+        </tr>
+                <tr>
+        <td> status </td>
+        <td> Current status of NAT rule. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> NORMAL </td>
+        </tr>
+                <tr>
+        <td> internal_ip </td>
+        <td> Internal/private IP. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> 10.0.0.45 </td>
+        </tr>
+                <tr>
+        <td> id </td>
+        <td> NAT rule ID. </td>
+        <td align=center>  </td>
+        <td align=center> string </td>
+        <td align=center> aaaaa000-a000-4050-a215-2808934ccccc </td>
+        </tr>
+        
+        </table>
+    </td></tr>
+
+        
+    </table>
+    </br></br>
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+

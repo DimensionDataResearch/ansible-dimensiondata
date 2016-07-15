@@ -1,0 +1,264 @@
+.. _dimensiondata_compute:
+
+
+dimensiondata_compute - create, terminate, start or stop an server in dimensiondata
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+.. versionadded:: 1.9
+
+
+.. contents::
+   :local:
+   :depth: 1
+
+
+Synopsis
+--------
+
+Creates, terminates, starts or stops servers in the Dimension Data Cloud
+
+
+
+
+Options
+-------
+
+.. raw:: html
+
+    <table border=1 cellpadding=4>
+    <tr>
+    <th class="head">parameter</th>
+    <th class="head">required</th>
+    <th class="head">default</th>
+    <th class="head">choices</th>
+    <th class="head">comments</th>
+    </tr>
+            <tr>
+    <td>admin_password<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The administrator account password for a new server.</div></td></tr>
+            <tr>
+    <td>description<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The description for the new node.</div></td></tr>
+            <tr>
+    <td>ensure<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>present</td>
+        <td><ul><li>present</li><li>absent</li><li>running</li><li>stopped</li></ul></td>
+        <td><div>the state you want the hosts to be in.</div></td></tr>
+            <tr>
+    <td>image<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The image name or ID to provision with.</div></td></tr>
+            <tr>
+    <td>ipv4_addresses<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>List of IPv4 addresses to connect.</div><div>Only one address per VLAN/Network is allowed.</div></td></tr>
+            <tr>
+    <td>location<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The target datacenter.</div></td></tr>
+            <tr>
+    <td>memory_gb<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The amount of memory for the new host to have in GB.</div></td></tr>
+            <tr>
+    <td>network_domain<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>The name or ID of the network domain to provision to.</div></br>
+        <div style="font-size: small;">aliases: network<div></td></tr>
+            <tr>
+    <td>nodes<br/><div style="font-size: small;"></div></td>
+    <td>yes</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>A list of server ID or names to work on.</div></br>
+        <div style="font-size: small;">aliases: servers<div></td></tr>
+            <tr>
+    <td>operate_on_multiple<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul><li>True</li><li>False</li></ul></td>
+        <td><div>By default Dimension Data allows the same name for multiple servers.</div><div>This will allow this module to operate on mulitple nodes/servers if names are given instead of IDs.</div><div>WARNING- This can be dangerous!!</div></td></tr>
+            <tr>
+    <td>primary_dns<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Primary DNS server IP or FQDN.</div></td></tr>
+            <tr>
+    <td>region<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>[u'na']</td>
+        <td><ul><li>Regions are defined in Apache libcloud project - file = libcloud/common/dimensiondata.py</li><li>See https://libcloud.readthedocs.io/en/latest/ - ..    compute/drivers/dimensiondata.html</li><li>Note that values avail in array dd_regions().</li><li>Note that the default value of na = "North America"</li></ul></td>
+        <td><div>The target region.</div></td></tr>
+            <tr>
+    <td>secondary_dns<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Secondary DNS server IP or FQDN.</div></td></tr>
+            <tr>
+    <td>unique_names<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul><li>True</li><li>False</li></ul></td>
+        <td><div>By default Dimension Data allows the same name for multiple servers.</div><div>This will make sure we do not create a new server if the name already exists.</div></td></tr>
+            <tr>
+    <td>verify_ssl_cert<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>True</td>
+        <td><ul></ul></td>
+        <td><div>Check that SSL certificate is valid.</div></td></tr>
+            <tr>
+    <td>vlans<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>List of names or IDs of the VLANs to connect to.</div><div>They will be connected in order specified.</div></td></tr>
+            <tr>
+    <td>wait<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td></td>
+        <td><ul></ul></td>
+        <td><div>Should we wait for the task to complete before moving onto the next.</div></td></tr>
+            <tr>
+    <td>wait_poll_interval<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>2</td>
+        <td><ul></ul></td>
+        <td><div>The amount to time inbetween polling for task completion.</div></td></tr>
+            <tr>
+    <td>wait_time<br/><div style="font-size: small;"></div></td>
+    <td>no</td>
+    <td>600</td>
+        <td><ul></ul></td>
+        <td><div>Only applicable if wait is true. This is the amount of time in seconds to wait.</div></td></tr>
+        </table>
+    </br>
+
+
+
+Examples
+--------
+
+ ::
+
+    # Note: These examples don't include authorization.
+    #       You can set these by exporting DIDATA_USER and DIDATA_PASSWORD var:
+    # export DIDATA_USER=<username>
+    # export DIDATA_PASSWORD=<password>
+    
+    # Basic create node example
+    
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        image: 'RedHat 7 64-bit 2 CPU'
+        nodes:
+          - ansible-test-image
+        admin_password: fakepass
+    
+    # Ensure servers are running and wait for it to come up
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        ensure: running
+        nodes:
+          - my_node_1
+          - my_node_2
+        wait: yes
+    
+    # Ensure servers are stopped and wait for them to stop
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        ensure: stopped
+        nodes:
+          - my_node_1
+          - {{ node_id }}
+        wait: yes
+    
+    # Destroy servers
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        ensure: absent
+        nodes:
+          - my_node_1
+          - my_node_2
+    
+    # ---------------
+    # Working with
+    # non unique names
+    # ---------------
+    
+    # Create nodes
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        image: 'RedHat 7 64-bit 2 CPU'
+        nodes:
+          - ansible-test-image1
+          - ansible-test-image2
+          - ansible-test-image1
+          - ansible-test-image2
+        admin_password: fakepass
+        unique_names: false
+        primary_dns: 4.2.2.1
+        secondary_dns: 8.8.8.8
+        operate_on_multiple: true
+    
+    # Shutdown nodes
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        nodes:
+          - ansible-test-image1
+          - ansible-test-image2
+          - ansible-test-image1
+          - ansible-test-image2
+        ensure: stopped
+        unique_names: false
+        operate_on_multiple: true
+    
+    # Delete nodes
+    - dimensiondata_compute:
+        vlan: '{{ vlan }}'
+        network_domain: '{{ network_domain_id }}'
+        nodes:
+          - ansible-test-image1
+          - ansible-test-image2
+          - ansible-test-image1
+          - ansible-test-image2
+        ensure: absent
+        unique_names: false
+        operate_on_multiple: true
+
+
+
+
+    
+This is an Extras Module
+------------------------
+
+For more information on what this means please read :doc:`modules_extra`
+
+    
+For help in developing on modules, should you be so inclined, please read :doc:`community`, :doc:`developing_test_pr` and :doc:`developing_modules`.
+
