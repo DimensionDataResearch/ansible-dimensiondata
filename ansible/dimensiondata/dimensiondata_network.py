@@ -36,15 +36,22 @@ dd_regions = get_dd_regions()
 DOCUMENTATION = '''
 ---
 module: dimensiondata_network
-short_description:
-    - Create, update, and delete MCP 1.0 & 2.0 networks
-version_added: '2.1'
+short_description: Create, update, and delete MCP 1.0 & 2.0 networks
+description:
+  - Create, update, and delete MCP 1.0 & 2.0 networks
+version_added: 2.1
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
-    choices: %s
+    choices:
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
     default: na
   location:
     description:
@@ -91,7 +98,7 @@ options:
       - Should the resource be present or absent.
     choices: [present, absent]
     default: present
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Create an MCP 1.0 network

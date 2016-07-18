@@ -40,13 +40,19 @@ short_description: Create, delete and list public IP blocks.
 description:
   - Get specified number of free addresses;
   - Provision to reach requested number.
-version_added: '2.1'
+version_added: 2.1
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
-    choices: %s
+    choices:
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
     default: na
   network_domain:
     description:
@@ -59,13 +65,13 @@ options:
   block_id:
     description:
       - The first IP of the newtork block.
-      - This or 'base_ip' is required when releasing existing block.
+      - This or base_ip is required when releasing existing block.
     required: false
     default: false
   base_ip:
     description:
       - The first IP of the newtork block.
-      - This or 'block_id' Required when releasing existing block.
+      - This or block_id Required when releasing existing block.
     required: false
     default: false
   action:
@@ -74,11 +80,13 @@ options:
     choices: [get, get_free, add, delete]
     required: true
   count:
-    description: Number of public IPs needed.
+    description:
+      - Number of public IPs needed.
     required: false
     default: 1
   reuse_free:
-    description: If true existing free IPs will be used to fufill 'count'.
+    description:
+      - If true existing free IPs will be used to fufill count.
     required: false
     default: true
   verify_ssl_cert:
@@ -86,7 +94,7 @@ options:
       - Check that SSL certificate is valid.
     required: false
     default: true
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Add public IP block

@@ -45,17 +45,20 @@ short_description: Create, update, and delete MCP 2.0 firewall rules.
 description:
     - Create, update, and delete MCP 2.0 firewall rules.
     - Requires MCP 2.0.
-version_added: '2.1'
+version_added: 2.1
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
     choices:
-      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
-      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
-      - Note: Values avail in array dd_regions(). 
-    default: 'na' (North America)
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
+    default: na
   location:
     description:
       - The target datacenter.
@@ -71,9 +74,9 @@ options:
   state:
     description:
       - State the resource should be in - present, absent, enabled, disabled.
-      - If 'enabled' or 'present' given and rule does not exist, rule will be created and enabled.
-      - If 'disabled' given and rule does not exist, rule will be created and disabled.
-      - If 'absent' given, rule will be deleted.
+      - If enabled or present given and rule does not exist, rule will be created and enabled.
+      - If disabled given and rule does not exist, rule will be created and disabled.
+      - If absent given, rule will be deleted.
     choices: [present, absent, enabled, disabled]
     default: present
   action:
@@ -123,7 +126,7 @@ options:
     description:
       - Check that SSL certificate is valid.
     default: true
-''' %
+'''
 
 EXAMPLES = '''
 # Create and enable an IPv4 single port TCP allow rule to single destination:
@@ -233,7 +236,7 @@ firewall_rule:
             sample: NA12
         status:
             description: Rule state.
-            type string
+            type: string
             sample: enabled
 '''
 

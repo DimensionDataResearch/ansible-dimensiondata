@@ -25,25 +25,28 @@ options:
       - The state you want the hosts to be in.
     required: false
     default: present
-    choices: ['present', 'absent']
+    choices: [present, absent]
   node_ids:
     description:
       - A list of server ids to work on
     required: false
     default: null
-    aliases: ['server_id', 'server_ids', 'node_id']
+    aliases: [server_id, server_ids, node_id]
   region:
     description:
       - The target region.
     choices:
-      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
-      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
-      - Note: Values avail in array dd_regions(). 
-    default: 'na' (North America)
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
+    default: na
   client_type:
     description:
       - The service plan for backups.
-    choices: [FA.AD. FA.Linux, FA.Win, PostgreSQL, MySQL]
+    choices: [FA.AD, FA.Linux, FA.Win, PostgreSQL, MySQL]
   verify_ssl_cert:
     description:
       - Check that SSL certificate is valid.
@@ -56,7 +59,7 @@ options:
   storage_policy:
     description:
       - The storage policy for backups.
-    choices: [14 Day Storage Policy, 30 Day Storage Policy, ect.]
+    choices: [14 Day Storage Policy, 30 Day Storage Policy, etc.]
   notify_email:
     description:
       - The email to notify for a trigger.
@@ -101,10 +104,10 @@ EXAMPLES = '''
 
 RETURN = '''
 servers:
-    description: list of servers this worked on
-    returned: Always
-    type: list
-    contains: node_ids processed
+  description: list of servers this worked on
+  returned: Always
+  type: list
+  contains: node_ids processed
 '''
 
 

@@ -39,15 +39,22 @@ dd_regions = get_dd_regions()
 DOCUMENTATION = '''
 ---
 module: dimensiondata_nat
-short_description:
-    - Create, List, Get or Delete NAT rules.
-version_added: '2.1'
+short_description: Create, List, Get or Delete NAT rules.
+description:
+  - Create, List, Get or Delete NAT rules.
+version_added: 2.1
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
-    choices: %s
+    choices:
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
     default: na
   location:
     description:
@@ -67,7 +74,8 @@ options:
     required: false
     default: null
   provision_external_ip:
-    description: Auto allocates a public IP address.
+    description:
+      - Auto allocates a public IP address.
     required: false
     defauilt: true
   verify_ssl_cert:
@@ -78,9 +86,9 @@ options:
   action:
     description:
       - present, absent
-    choices: ['present', 'absent']
+    choices: [present, absent]
     default: present
-''' % str(dd_regions)
+'''
 
 EXAMPLES = '''
 # Create NAT rule.

@@ -19,7 +19,7 @@ DOCUMENTATION = '''
 module: dimensiondata_backup
 short_description: Enable or Disable backups for a host.
 description:
-    - Creates, enables/disables backups for a host in the Dimension Data Cloud.
+  - Creates, enables/disables backups for a host in the Dimension Data Cloud.
 version_added: "1.9"
 options:
   state:
@@ -28,21 +28,24 @@ options:
     required: false
     default: present
     aliases: []
-    choices: ['present', 'absent']
+    choices: [present, absent]
   node_ids:
     description:
       - A list of server ids to work on.
     required: false
     default: null
-    aliases: ['server_id', 'server_ids', 'node_id']
+    aliases: [server_id, server_ids, node_id]
   region:
     description:
       - The target region.
     choices:
-      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
-      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
-      - Note: Values avail in array dd_regions(). 
-    default: na aka North America
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
+    default: na
   service_plan:
     description:
       - The service plan for backups.
@@ -75,7 +78,7 @@ author:
 '''
 
 EXAMPLES = '''
-# Note: These examples don't include authorization.
+# Note: These examples do not include authorization.
 # You can set these by exporting DIDATA_USER and DIDATA_PASSWORD vars:
 # export DIDATA_USER=<username>
 # export DIDATA_PASSWORD=<password>
@@ -105,10 +108,10 @@ EXAMPLES = '''
 
 RETURN = '''
 servers:
-    description: List of servers this worked on.
-    returned: Always
-    type: list
-    contains: node_ids processed
+  description: List of servers this worked on.
+  returned: Always
+  type: list
+  contains: node_ids processed
 '''
 
 

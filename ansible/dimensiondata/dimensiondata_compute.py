@@ -26,23 +26,26 @@ options:
     description:
       - The target region.
     choices:
-      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
-      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
-      - Note: Values avail in array dd_regions(). 
-    default: 'na' (North America)
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
+    default: na
   ensure:
     description:
-      - the state you want the hosts to be in.
+      - The state you want the hosts to be in.
     required: false
     default: present
     aliases: []
-    choices: ['present', 'absent', 'running', 'stopped']
+    choices: [present, absent, running, stopped]
   nodes:
     description:
       - A list of server ID or names to work on.
     required: true
     default: null
-    aliases: ['servers']
+    aliases: [servers]
   image:
     description:
       - The image name or ID to provision with.
@@ -68,7 +71,7 @@ options:
       - The name or ID of the network domain to provision to.
     required: true
     default: null
-    aliases: ['network']
+    aliases: [network]
   location:
     description:
       - The target datacenter.
@@ -92,19 +95,21 @@ options:
     default: null
     aliases: []
   primary_dns:
-    description: Primary DNS server IP or FQDN.
+    description:
+      - Primary DNS server IP or FQDN.
     required: false
     default: null
     aliases: []
   secondary_dns:
-    description: Secondary DNS server IP or FQDN.
+    description:
+      - Secondary DNS server IP or FQDN.
     required: false
     default: null
     aliases: []
   unique_names:
     description:
       - By default Dimension Data allows the same name for multiple servers.
-      - This will make sure we don't create a new server if the name already exists.
+      - This will make sure we do not create a new server if the name already exists.
     required: false
     default: true
     aliases: []
@@ -113,7 +118,7 @@ options:
     description:
       - By default Dimension Data allows the same name for multiple servers.
       - This will allow this module to operate on mulitple nodes/servers if names are given instead of IDs.
-      - WARNING: This can be dangerous!!
+      - WARNING- This can be dangerous!!
     required: false
     default: false
     aliases: []

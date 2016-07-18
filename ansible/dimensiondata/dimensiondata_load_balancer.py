@@ -45,15 +45,22 @@ lb_algs = ['ROUND_ROBIN', 'LEAST_CONNECTIONS',
 DOCUMENTATION = '''
 ---
 module: dimensiondata_load_balancer
-short_description:
-    - Create, Update or Delete Load Balancers.
-version_added: '2.1'
+description:
+  - Create, update or delete load balancers.
+short_description: Create, update or delete load balancers.
+version_added: 2.1
 author: 'Aimon Bustardo (@aimonb)'
 options:
   region:
     description:
       - The target region.
-    choices: %s
+    choices:
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
     default: na
   location:
     description:
@@ -69,8 +76,8 @@ options:
     required: true
   port:
     description:
-        - An integer in the range of 1-65535. If not supplied, it will
-          be taken to mean "Any Port"
+        - An integer in the range of 1-65535. 
+        - If not supplied, it will be taken to mean "Any Port"
     required: false
     default: None
   listener_ip_address:
@@ -79,20 +86,21 @@ options:
     required: false
     default: None
   provision_listener_ip_address:
-    description: Auto allocates a public IP address.
+    description:
+      - Auto allocates a public IP address.
     required: false
     defauilt: true
   protocol:
     description:
-        - Choice of %s.
+        - Choice of an enumeration of protocols
     required: false
-    choices: %s
+    choices: [any, tcp, udp, http, ftp, smtp]
     default: http
   algorithm:
     description:
-        - Choice of %s.
+        - Choice of an enumerations of algorithms
     required: false
-    choices: %s
+    choices: [ROUND_ROBIN, LEAST_CONNECTIONS, SHORTEST_RESPONSE, PERSISTENT_IP]
     default: ROUND_ROBIN
   members:
     description:
@@ -107,10 +115,10 @@ options:
   ensure:
     description:
       - present, absent.
-    choices: ['present', 'absent']
+    choices: [present, absent]
     default: present
-''' % (str(dd_regions), str(protocols), str(protocols), str(lb_algs),
-       str(lb_algs))
+'''
+
 
 EXAMPLES = '''
 # Construct Load Balancer

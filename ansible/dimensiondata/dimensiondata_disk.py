@@ -28,21 +28,24 @@ options:
     required: false
     default: present
     aliases: []
-    choices: ['present', 'absent']
+    choices: [present, absent]
   node_ids:
     description:
       - A list of server ids to work on.
     required: false
     default: null
-    aliases: ['server_id', 'server_ids', 'node_id']
+    aliases: [server_id, server_ids, node_id]
   region:
     description:
       - The target region.
     choices:
-      - Regions are defined in Apache libcloud project file = libcloud/common/dimensiondata.py 
-      - See https://libcloud.readthedocs.io/en/latest/compute/drivers/dimensiondata.html
-      - Note: Values avail in array dd_regions(). 
-    default: 'na' (North America)
+      - Regions are defined in Apache libcloud project
+        - file = libcloud/common/dimensiondata.py 
+      - See https://libcloud.readthedocs.io/en/latest/
+        - ..    compute/drivers/dimensiondata.html
+      - Note that values avail in array dd_regions(). 
+      - Note that the default value of na = "North America"
+    default: na
   speed:
     description:
       - The speed of the disk.
