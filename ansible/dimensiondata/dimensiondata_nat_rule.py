@@ -205,7 +205,8 @@ def main():
     if ensure == 'present':
         if nat_rule is False:
             # Get external IP
-            if module.params['provision_external_ip'] is True:
+            if module.params['provision_external_ip'] is True and \
+                    external_ip is None:
                 # Get addresses
                 res = get_unallocated_public_ips(module, client, lb_client,
                                                  net_domain, True, 1)
