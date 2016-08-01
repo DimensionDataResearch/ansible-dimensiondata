@@ -184,7 +184,7 @@ def list_pools(module, lb_driver):
 def get_pool(module, lb_driver):
     if is_uuid(module.params['name']):
         try:
-            return lb_driver.get_pool(module.params['name'])
+            return lb_driver.ex_get_pool(module.params['name'])
         except DimensionDataAPIException as e:
             if e.code == 'RESOURCE_NOT_FOUND':
                 return False
@@ -319,7 +319,8 @@ def main():
             create_pool(module, lb_driver, net_domain.id)
         else:
             module.exit_json(changed=False, msg="Load balancer pool already " +
-                             "exists.", load_balancer_pool=pool_obj_to_dict(pool))
+                             "exists.",
+                             load_balancer_pool=pool_obj_to_dict(pool))
     elif ensure == 'absent':
         if pool is False:
             module.exit_json(changed=False, msg="Load balancer pool with " +
