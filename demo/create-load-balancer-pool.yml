@@ -14,4 +14,14 @@
         health_monitor_2: Tcp
         service_down_action: DROP
         slow_ramp_time: 23
+        members:
+          node1:
+            ip: 10.1.1.4
+            port: 80
+          node2:
+            ip: 10.1.1.5
+            port: 80
+#          node3:
+#            ip: 10.1.1.134
+#            port: 8080
         ensure: present

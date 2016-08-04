@@ -111,6 +111,16 @@ options:
         - Number of seconds to stagger ramp up of nodes.
     required: false
     default: 30
+  members:
+    description:
+      - Nested dictionaries of pool members name ip and port.
+      - In format of {<name>: {'ip': <ip>, 'port': <port>}, ...}
+    required: false
+    default: null
+  destroy_nodes:
+      description: Destroy nodes when removing members.
+      type: bool
+      default: true
   verify_ssl_cert:
     description:
       - Check that SSL certificate is valid.
@@ -132,7 +142,39 @@ EXAMPLES = '''
     network_domain: test_network
     name: web_lb01_pool01
     load_balance_method: ROUND_ROBIN
+    members:
+        node01:
+            ip: 10.0.0.4
+            port: 80
+        node02
+            ip: 10.0.0.5
+            port: 80
+        10.0.0.6
+            ip: 10.0.0.6
+            port: 8080
     ensure: present
+# Remove one member from same Load Balancer Pool
+- dimensiondata_load_balancer_pool:
+    region: na
+    location: NA5
+    network_domain: test_network
+    name: web_lb01_pool01
+    load_balance_method: ROUND_ROBIN
+    members:
+        node01:
+            ip: 10.0.0.4
+            port: 80
+        node02:
+            ip: 10.0.0.5
+            port: 80
+    ensure: present
+# Delete Pool
+- dimensiondata_load_balancer_pool:
+    region: na
+    location: NA5
+    network_domain: test_network
+    name: web_lb01_pool01
+    ensure: absent
 '''
 
 
@@ -166,6 +208,22 @@ load_balancer_pool:
             description: ID of chosen health monitor.
             type: string
             example: None
+        members:
+            description: List of attached nodes and their ports.
+            type: list
+            example:
+                node01:
+                    id: b78dfbf8-ff7c-48c3-8fc9-aaaaaaaaaaaa
+                    node_id: 618f5527-3d83-4539-aaaaaaaaaaaa
+                    ip: 192.168.0.4
+                    port: 80
+                    status: NORMAL
+                node02:
+                    id: b78dfbf8-ff7c-48c3-8fc9-bbbbbbbbbbbb
+                    node_id: 618f5527-3d83-4539-bbbbbbbbbbbb
+                    ip: 192.168.0.5
+                    port: 80
+                    status: NORMAL
         status:
             description: Load balancer pool status.
             type: integer
@@ -205,7 +263,7 @@ def get_pool(module, lb_driver):
             return False
 
 
-def pool_obj_to_dict(pool_obj):
+def pool_obj_to_dict(pool_obj, members):
     return {
         'id': pool_obj.id,
         'name': pool_obj.name,
@@ -214,8 +272,19 @@ def pool_obj_to_dict(pool_obj):
         'load_balance_method': pool_obj.load_balance_method,
         'slow_ramp_time': pool_obj.slow_ramp_time,
         'service_down_action': pool_obj.service_down_action,
-        'health_monitor_id': pool_obj.health_monitor_id
+        'health_monitor_id': pool_obj.health_monitor_id,
+        'members': pool_members_to_dict(members)
     }
+
+
+def pool_members_to_dict(members):
+    members_dict = {}
+    for member in members:
+        members_dict[member.name] = {'id': member.node_id,
+                                     'ip': member.ip,
+                                     'port': member.port
+                                     }
+    return members_dict
 
 
 def to_health_monitor(module, domain_id, lb_driver, monitor_txt):
@@ -245,10 +314,68 @@ def create_pool(module, lb_driver, domain_id):
                                         monitors,
                                         module.params['service_down_action'],
                                         module.params['slow_ramp_time'])
-        module.exit_json(changed=True, msg="Success.",
-                         load_balancer_pool=pool_obj_to_dict(pool))
+        return pool
     except DimensionDataAPIException as e:
         module.fail_json(msg="Error while creating load balancer pool: %s" % e)
+
+
+def get_node_by_name_and_ip(module, lb_driver, name, ip):
+    nodes = lb_driver.ex_get_nodes()
+    found_nodes = []
+    if not is_ipv4_addr(ip):
+        module.fail_json(msg="Node '%s' ip is not a valid IPv4 address" % ip)
+    found_nodes = filter(lambda x: x.name == name and x.ip == ip, nodes)
+    if len(found_nodes) == 0:
+        return None
+    elif len(found_nodes) == 1:
+        return found_nodes[0]
+    else:
+        module.fail_json(msg="More than one node of name '%s' found." % name)
+
+
+def quiesce_members(module, lb_driver, pool):
+    changed = False
+    # Desired members
+    desired_members = module.params['members']
+    # Get current list of members
+    existing_members = lb_driver.ex_get_pool_members(pool.id)
+    # Quiesced members
+    quiesced_members = []
+    # Get desired members details / Make sure they exist
+    for name, data in desired_members.iteritems():
+        # Quiesce node
+        node = get_node_by_name_and_ip(module, lb_driver, name, data['ip'])
+        if node is None:
+            # Exit with error since nodes should pre-exist
+            module.fail_json(msg="Node '%s' does not exist. " % name +
+                             "You must create node first.")
+        else:
+            # node exists, let see if its attached and attach if not.
+            res = filter(lambda x: x.node_id == node.id,
+                         existing_members)
+            if len(res) == 0:
+                # We need to attach it (create member object)
+                try:
+                    mem_port = module.params['members'][node.name]['port']
+                    n_member = lb_driver.ex_create_pool_member(pool=pool,
+                                                               node=node,
+                                                               port=mem_port)
+                    # Add to quiesced list
+                    quiesced_members.append(n_member)
+                    changed = True
+                except DimensionDataAPIException as e:
+                    module.fail_json(msg="Creation of pool member failed: " +
+                                     "%s" % e)
+            else:
+                # Node is attached, add to quiesced list
+                quiesced_members.append(res[0])
+    # Remove unlisted nodes
+    to_delete = list(set(existing_members) - set(quiesced_members))
+    for member in to_delete:
+        dn = module.params['destroy_nodes']
+        lb_driver.ex_destroy_pool_member(member, destroy_node=dn)
+        changed = True
+    return (changed, quiesced_members)
 
 
 def main():
@@ -270,6 +397,8 @@ def main():
             health_monitor_2=dict(default=None, choices=monitor_methods),
             service_down_action=dict(default=None, choices=down_actions),
             slow_ramp_time=dict(required=False, default=30, type='int'),
+            members=dict(required=False, default=None, type='dict'),
+            destroy_nodes=dict(required=False, default=True, type='bool'),
             ensure=dict(default='present', choices=['present', 'absent']),
             verify_ssl_cert=dict(required=False, default=True, type='bool'),
         ),
@@ -316,11 +445,11 @@ def main():
     pool = get_pool(module, lb_driver)
     if ensure == 'present':
         if pool is False:
-            create_pool(module, lb_driver, net_domain.id)
-        else:
-            module.exit_json(changed=False, msg="Load balancer pool already " +
-                             "exists.",
-                             load_balancer_pool=pool_obj_to_dict(pool))
+            pool = create_pool(module, lb_driver, net_domain.id)
+        changed, qm = quiesce_members(module, lb_driver, pool)
+        module.exit_json(changed=changed, msg="Load balancer pool " +
+                         "successfully quiesced.",
+                         load_balancer_pool=pool_obj_to_dict(pool, qm))
     elif ensure == 'absent':
         if pool is False:
             module.exit_json(changed=False, msg="Load balancer pool with " +

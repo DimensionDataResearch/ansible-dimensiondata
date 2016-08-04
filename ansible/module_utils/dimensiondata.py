@@ -330,3 +330,14 @@ def get_unallocated_public_ips(module, cp_driver, lb_driver, network_domain,
     else:
         return {'changed': False, 'msg': 'Found enough unallocated IPs' +
                 ' without provisioning.', 'addresses': free_ips}
+
+
+# ------------------------------------
+# Simple way to check if IPv4 address
+# ------------------------------------
+def is_ipv4_addr(ip):
+    parts = ip.split('.')
+    try:
+        return len(parts) == 4 and all(0 <= int(part) < 256 for part in parts)
+    except:
+        return False
