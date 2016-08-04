@@ -319,20 +319,6 @@ def create_pool(module, lb_driver, domain_id):
         module.fail_json(msg="Error while creating load balancer pool: %s" % e)
 
 
-def get_node_by_name_and_ip(module, lb_driver, name, ip):
-    nodes = lb_driver.ex_get_nodes()
-    found_nodes = []
-    if not is_ipv4_addr(ip):
-        module.fail_json(msg="Node '%s' ip is not a valid IPv4 address" % ip)
-    found_nodes = filter(lambda x: x.name == name and x.ip == ip, nodes)
-    if len(found_nodes) == 0:
-        return None
-    elif len(found_nodes) == 1:
-        return found_nodes[0]
-    else:
-        module.fail_json(msg="More than one node of name '%s' found." % name)
-
-
 def quiesce_members(module, lb_driver, pool):
     changed = False
     # Desired members

@@ -1,0 +1,15 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: Create Load Balancer Node
+      dimensiondata_load_balancer_node:
+        region: na
+        location: NA12
+        network_domain: ansible-capabilities-demo
+        name: node4
+        description: a node yo
+        ip: 10.1.1.23
+        connection_limit: 23
+        connection_rate_limit: 2333
+        ensure: absent
