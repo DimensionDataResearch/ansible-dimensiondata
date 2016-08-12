@@ -1,39 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016 Dimension Data
+# (c) 2016 Dimension Data All Rights Reserved.
 #
-# This module is free software: you can redistribute it and/or modify
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This software is distributed in the hope that it will be useful,
+# Ansible is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this software.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Authors:
-#   - Aimon Bustardo <aimon.bustardo@dimensiondata.com>
-#
-from ansible.module_utils.basic import *
-from ansible.module_utils.dimensiondata import *
-try:
-    from libcloud.common.dimensiondata import DimensionDataAPIException
-    from libcloud.loadbalancer.types import Provider as LBProvider
-    from libcloud.compute.types import Provider as ComputeProvider
-    from libcloud.loadbalancer.providers import get_driver as get_lb_driver
-    from libcloud.compute.providers import get_driver as get_cp_driver
-    import libcloud.security
-    HAS_LIBCLOUD = True
-except:
-    HAS_LIBCLOUD = False
-
-# Get regions early to use in docs etc.
-dd_regions = get_dd_regions()
+# along with Ansible. If not, see <http://www.gnu.org/licenses/>.
 
 DOCUMENTATION = '''
 ---
@@ -145,6 +128,22 @@ load_balancer_node:
             type: integer
             sample: NORMAL
 '''
+
+from ansible.module_utils.basic import *
+from ansible.module_utils.dimensiondata import *
+try:
+    from libcloud.common.dimensiondata import DimensionDataAPIException
+    from libcloud.loadbalancer.types import Provider as LBProvider
+    from libcloud.compute.types import Provider as ComputeProvider
+    from libcloud.loadbalancer.providers import get_driver as get_lb_driver
+    from libcloud.compute.providers import get_driver as get_cp_driver
+    import libcloud.security
+    HAS_LIBCLOUD = True
+except:
+    HAS_LIBCLOUD = False
+
+# Get regions early to use in docs etc.
+dd_regions = get_dd_regions()
 
 
 def list_nodes(module, lb_driver):
