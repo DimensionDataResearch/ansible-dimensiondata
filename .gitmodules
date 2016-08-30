@@ -1,6 +1,0 @@
-[submodule "ansible"]
-	path = ansible
-	url = https://github.com/DimesionDataResearch/ansible.git
-[submodule "ansible-modules-extras"]
-	path = ansible-modules-extras
-	url = https://github.com/DimensionDataResearch/ansible-modules-extras.git
