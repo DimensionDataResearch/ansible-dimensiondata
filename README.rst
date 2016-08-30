@@ -1,7 +1,14 @@
 Dimension Data Ansible Module
 =============================
 
-Ansible modules for dimensiondata
+This repo "supports" both the DimensionDataResearch ansible-related repos.
+
+Specifically,
+  - core Ansible at ( https://github.com/DimensionDataResearch/ansible )
+  - Ansible modules extras at ( https://github.com/DimensionDataResearch/ansible-modules-extras )
+
+This repo provides Dimension-Data custom documentation as well as Ansible demo
+code.
 
 Contributing
 ============
