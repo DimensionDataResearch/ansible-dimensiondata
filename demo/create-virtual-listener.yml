@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Create a Virtual Listener with ALL params
+      dimensiondata_virtual_listener:
+        region: na
+        location: NA12
+        network_domain: jayross_network
+        name: virt_this_should_work
+        ex_description: virt_this_should_work
+        port: 80
+        persis_prof_type: PERFORMANCE_LAYER_4
+        persis_prof_protocol: any
+        fb_persis_prof_type: STANDARD
+        fb_persis_prof_protocol: http
+        irule_persis_prof_type: STANDARD
+        irule_persis_prof_protocol: UDP
+        protocol: HTTP
+        source_port_preservation: PRESERVE
+        ensure: present
+
+
