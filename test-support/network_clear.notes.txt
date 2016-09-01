@@ -1,0 +1,94 @@
+
+network_clear.py is a utility to clear/delete/purge network items.
+
+Help shows:
+
+    usage: network-clear.py [-h] --region REGION --network NETWORK --location
+                            LOCATION [--all] [--lbs] [--lbnodes] [--pools]
+                            [--cpnodes] [--vlans] [--nats] [--ips] [--firewalls]
+                            [--quiet] [--showparams] [--listonly]
+
+    Util to clear/remove objects from a specified DimensionData network.
+
+    optional arguments:
+      -h, --help           show this help message and exit
+      --region REGION      Region
+      --network NETWORK    Network name
+      --location LOCATION  Network location
+      --all                clear ALL
+      --lbs                clear virt-lists/load-balancers
+      --lbnodes            clear LoadBalancer nodes
+      --pools              clear pools
+      --cpnodes            clear compute nodes aka servers
+      --vlans              clear vlans
+      --nats               clear compute Nat Rules
+      --ips                clear compute Public IP Blocks
+      --firewalls          clear firewall rules
+      --quiet              quiet aka no normal output
+      --showparams         show passed params
+      --listonly           only list aka do not clear anything aka READ-ONLY
+
+
+This shows that:
+   - region, network and location are all required params
+
+   - You can select one or more of the following items to clear:
+      --lbs                clear virt-lists/load-balancers
+      --lbnodes            clear LoadBalancer nodes
+      --pools              clear pools
+      --cpnodes            clear compute nodes aka servers
+      --vlans              clear vlans
+      --nats               clear compute Nat Rules
+      --ips                clear compute Public IP Blocks
+      --firewalls          clear firewall rules
+
+   - Alternatively, you can select --all to clear all items
+
+   - There is a "show only" mode, when you use --listonly
+
+   - There is a --quiet mode if you don't want any output
+
+   - There is a --showparams flag to show you how it 
+     interepretted the command line
+
+Here is an example command and it's output.
+Note that this is running against a network that is already "empty/clear".
+
+    ./network-clear.py --network jayross_network --region na --location NA12 --all --showparams --listonly
+
+    Passed params:
+    ------------------------------------------
+    network:              [ jayross_network ]
+    region:               [ dd-na ]
+    location:             [ NA12 ]
+    lbs:                  [ True ]
+    lbnodes:              [ True ]
+    pools:                [ True ]
+    cpnodes:              [ True ]
+    vlans:                [ True ]
+    nats:                 [ True ]
+    ips:                  [ True ]
+    firewalls:            [ True ]
+    quiet:                [ False ]
+    listonly:             [ True ]
+    USING_JAYS_LIBCLOUD:  [ True ]
+    ------------------------------------------
+     
+     - - - - - - Load Balancers - - - - -
+     - - - - - - Pools - - - - -
+     - - - - - - LB Nodes - - - - -
+     - - - - - - Vlans - - - - -
+     - - - - - - CpNodes - - - - -
+     - - - - - - Nat Rules - - - - -
+     - - - - - - Public IP Blocks - - - - -
+     - - - - - - Firewall Rules - - - - -
+     
+    End.
+
+Note that:
+    - Setting --all shows that all items were selected.
+
+    - This code was written using new libcloud features that have not yet made it
+      to the official installed version of libcloud.  This will be fixed/changed soon.
+
+                
