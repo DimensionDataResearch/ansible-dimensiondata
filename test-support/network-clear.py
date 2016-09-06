@@ -19,8 +19,6 @@ try:
 except:
     HAS_LIBRARIES = False
 
-USING_JAYS_LIBCLOUD = True
-
 global network
 global region
 global location
@@ -61,10 +59,8 @@ def kill_pools(lb_driver, network_domain_id, quiet, listonly):
     try:
         show(quiet, ' - - - - - - Pools - - - - -')
 
-        if USING_JAYS_LIBCLOUD:
-            pools = lb_driver.ex_get_pools(network_id=network_domain_id)
-        else:
-            pools = lb_driver.ex_get_pools()
+        pools = lb_driver.ex_get_pools(
+            ex_network_domain_id=network_domain_id)
 
         for p in pools:
             show(quiet, "    Found pool = %s" % p.name)
@@ -89,10 +85,8 @@ def kill_lb_nodes(lb_driver, network_domain_id, quiet, listonly):
     try:
         show(quiet, ' - - - - - - LB Nodes - - - - -')
 
-        if USING_JAYS_LIBCLOUD:
-            nodes = lb_driver.ex_get_nodes(network_id=network_domain_id)
-        else:
-            nodes = lb_driver.ex_get_nodes()
+        nodes = lb_driver.ex_get_nodes(
+            ex_network_domain_id=network_domain_id)
 
         for n in nodes:
             show(quiet, "    Found LB node = %s" % n.name)
@@ -112,10 +106,9 @@ def kill_lb_nodes(lb_driver, network_domain_id, quiet, listonly):
 def kill_load_balancers(lb_driver, network_domain_id, quiet, listonly):
     try:
         show(quiet, ' - - - - - - Load Balancers - - - - -')
-        if USING_JAYS_LIBCLOUD:
-            virt_lists = lb_driver.list_balancers(network_id=network_domain_id)
-        else:
-            virt_lists = lb_driver.list_balancers()
+
+        virt_lists = lb_driver.list_balancers(
+            ex_network_domain_id=network_domain_id)
 
         for v in virt_lists:
             show(quiet, "    Found loadbalacer = %s" % v.name)
@@ -383,7 +376,6 @@ def main():
         print("firewalls:            [ %s ]" % firewalls)
         print("quiet:                [ %s ]" % quiet)
         print("listonly:             [ %s ]" % listonly)
-        print("USING_JAYS_LIBCLOUD:  [ %s ]" % USING_JAYS_LIBCLOUD)
         print("------------------------------------------")
         print(" ")
 

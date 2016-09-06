@@ -71,7 +71,6 @@ Note that this is running against a network that is already "empty/clear".
     firewalls:            [ True ]
     quiet:                [ False ]
     listonly:             [ True ]
-    USING_JAYS_LIBCLOUD:  [ True ]
     ------------------------------------------
      
      - - - - - - Load Balancers - - - - -
@@ -88,7 +87,9 @@ Note that this is running against a network that is already "empty/clear".
 Note that:
     - Setting --all shows that all items were selected.
 
-    - This code was written using new libcloud features that have not yet made it
-      to the official installed version of libcloud.  This will be fixed/changed soon.
+    - This code was written requires new libcloud features that have not yet made it
+      to the official installed version of libcloud.  It currently requires the
+      folllowing version of libcloud:  trunk branch at https://github.com/NexusIS/libcloud
+      This will be fixed/changed soon.
 
                 
