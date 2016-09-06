@@ -43,7 +43,7 @@ All steps below should be done by a non root user
 - Install Ansible from the DimensionData fork. This will only be necessary for a short time while Ansible team reviews our pull request
     # pip install -e ‘git+https://github.com/DimensionDataResearch/ansible.git@devel#egg=ansible'
 - Create MCP Cloud credentials file (can also use env vars instead) .. Please replace items in <> with actual user and pass:
-    # echo -ne "[dimensiondatacloud]\nDIDATA_USER: <username>\nDIDATA_PASSWORD: <password>\n" > ~/.dimensiondata
+    # echo -ne "[dimensiondatacloud]\\nDIDATA_USER: <username>\\nDIDATA_PASSWORD: <password>\\n" > ~/.dimensiondata
 
 To run a playbook:
 ansible-playbook -vvvv <playbookname>.yaml 
