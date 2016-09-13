@@ -1,0 +1,21 @@
+---
+region: na
+location: NA12
+network_name: ansible-test1
+network_domain_create: my_net_domain
+network_domain_load_balancer_node: ansible-capabilities-demo
+network_domain_firewall: DevOps_NA12
+name: ansible_test1
+state_absent: absent
+state_present: present
+action_add: add
+action_read: read
+action_delete: delete
+action_create: create
+action_update: update
+action_expand: expand
+ensure_stopped: stopped
+ensure_running: running
+ensure_absent: absent
+wait_yes: yes
+wait_no: no

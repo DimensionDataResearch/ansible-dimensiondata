@@ -5,9 +5,10 @@
       server_ids:
         - '9f8b5428-bac3-4cf9-adda-62f57fb38671'
     tasks:
+      - include_vars: dimensiondata_vars.yml
       - name: Start a host
         dimensiondata_compute:
-          ensure: running
+          ensure: "{{ensure_running}}"
           nodes:
             - '{{ server_ids }}'
-          wait: yes
+          wait: "{{wait_yes}}"

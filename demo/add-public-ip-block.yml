@@ -2,9 +2,11 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
+
 # Add public IP block
+  - include_vars: dimensiondata_vars.yml
   - dimensiondata_public_ip_block:
-      region: na
-      location: NA12
+      region: "{{region}}"
+      location: "{{location}}"
       network_domain: testing_network111
-      action: add
+      action: "{{action_add}}"

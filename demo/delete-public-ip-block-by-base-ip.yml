@@ -3,9 +3,10 @@
   connection: local
   tasks:
   # Delete public IP Block by base IP.
+  - include_vars: dimensiondata_vars.yml
   - dimensiondata_public_ip_block:
-      region: na
+      region: "{{region}}"
       network_domain: testing_network111
-      location: NA12
-      action: delete
+      location: "{{location}}"
+      action: "{{action_delete}}"
       base_ip: 168.12.2.1

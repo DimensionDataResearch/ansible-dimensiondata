@@ -2,21 +2,22 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
+  - include_vars: dimensiondata_vars.yml
   - dimensiondata_vlan:
-      region: na
-      location: NA12
+      region: "{{region}}"
+      location: "{{location}}"
       network_domain: Ansible_testing_agb
       name: my_vlan1
       description: A test VLANd Network.
       private_ipv4_base_address: '192.168.23.0'
       private_ipv4_prefix_size: 24
-      action: read
+      action: "{{action_read}}"
     register: vlan_result
   - block:
     - dimensiondata_vlan:
-        region: na
-        location: NA12
+        region: "{{region}}"
+        location: "{{location}}"
         network_domain: Ansible_testing_agb
         vlan_id: "{{ vlan_result['vlan']['id'] }}"
-        action: delete
+        action: "{{action_delete}}"
     when: vlan_result['vlan']['id']

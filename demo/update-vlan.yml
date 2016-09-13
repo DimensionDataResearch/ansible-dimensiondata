@@ -2,19 +2,20 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
+  - include_vars: dimensiondata_vars.yml
   - dimensiondata_vlan:
-      region: na
-      location: NA12
-      network_domain: my_net_domain
+      region: "{{region}}"
+      location: "{{location}}"
+      network_domain: "{{network_domain_create}}"
       name: my_vlan1
-      action: read
+      action: "{{action_read}}"
     register: vlan_result
   - block:
     - dimensiondata_vlan:
-        region: na
-        location: NA12
+        region: "{{region}}"
+        location: "{{location}}"
         name: my_vlan1_new_name
         description: New description
-        network_domain: my_net_domain
+        network_domain: "{{network_domain_create}}"
         vlan_id: "{{ vlan_result['vlan']['id'] }}"
-        action: update
+        action: "{{action_update}}"

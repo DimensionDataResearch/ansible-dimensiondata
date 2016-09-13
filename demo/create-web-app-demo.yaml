@@ -7,6 +7,7 @@
     region: CHANGEME
     location: CHANGEME
   tasks:
+    - include_vars: dimensiondata_vars.yml
 # Create Network
     - name: Create network
       dimensiondata_network:
@@ -25,13 +26,13 @@
         description: A test VLANd Network.
         private_ipv4_base_address: '10.1.1.0'
         private_ipv4_prefix_size: 24
-        action: create
-        wait: yes
+        action: "{{action_create}}"
+        wait: "{{wait_yes}}"
       register: vlan
 # Create host_1
     - name: create_host_1
       dimensiondata_compute:
-        ensure: present
+        ensure: "{{ensure_present}}"
         vlans:
           - "{{ vlan['vlan']['id'] }}"
         network_domain: "{{ network['network']['id'] }}"
@@ -44,7 +45,7 @@
         admin_password: "{{password}}"
         primary_dns: 4.2.2.2
         secondary_dns: 8.8.8.8
-        wait: no
+        wait: "{{wait_no}}"
       register: host1
 # Create host 2
     - name: create_host_2
@@ -60,7 +61,7 @@
           - server2
         unique_names: yes
         admin_password: "{{password}}"
-        wait: yes
+        wait: "{{wait_yes}}"
       register: host2
 # Create load balancer
     - name: Create Load Balancer
@@ -78,7 +79,7 @@
             - name: server2
               port: 80
               ip: "{{ host2['nodes'][0]['private_ipv4'][0] }}"
-        ensure: present
+        ensure: "{{ensure_present}}"
       register: lb
 # Create NAT Rules
     - name: Create NAT rule 1
@@ -87,7 +88,7 @@
         location: "{{location}}"
         network_domain: "{{network_name}}"
         internal_ip: "{{ host1['nodes'][0]['private_ipv4'][0] }}"
-        ensure: present
+        ensure: "{{ensure_present}}"
       register: pub_ips1
     - name: Create NAT rule 2
       dimensiondata_nat_rule:
@@ -95,7 +96,7 @@
         location: "{{location}}"
         network_domain: "{{network_name}}"
         internal_ip: "{{ host2['nodes'][0]['private_ipv4'][0] }}"
-        ensure: present
+        ensure: "{{ensure_present}}"
       register: pub_ips2
 # Create Firewall rules
     - name: Create HTTP firewall rule

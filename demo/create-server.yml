@@ -4,9 +4,10 @@
     vars:
       admin_password: fakepass
     tasks:
+      - include_vars: dimensiondata_vars.yml
       - name: Create host
         dimensiondata_compute:
-          ensure: running
+          ensure: "{{ensure_running}}"
           vlans:
             - my_vlan_1
             - my_vlan_2
@@ -15,4 +16,4 @@
           nodes:
             - ansible-test-image-rhel6
           admin_password: '{{ admin_password }}'
-          wait: yes
+          wait: "{{wait_yes}}"
