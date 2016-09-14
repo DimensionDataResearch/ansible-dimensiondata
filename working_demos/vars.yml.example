@@ -1,0 +1,15 @@
+---
+# EXAMPLE VARS file
+# Copy (DO NOT RENAME) this to vars.yml
+# Include vars.yml in your test playbooks.
+#
+# The VARS file exist so you can define your own variable values
+# as needed and affect all playbooks in this directory.
+#
+
+# Provide the geographic region e.g. na for North America
+dimension_data_region: na
+# Provide the location i.e. specific data center within the region
+dimension_data_location: NA12
+# Provide the network domain name
+dimension_data_network_domain: NETWORK_DOMAIN_NAME_HERE
