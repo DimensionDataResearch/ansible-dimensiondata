@@ -1,0 +1,8 @@
+---
+# These exist here so that you can change them
+# as needed and affect all of the code in this directory
+#
+region: na
+location: NA12
+network_domain: my_net_domain
+
