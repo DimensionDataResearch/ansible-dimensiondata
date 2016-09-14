@@ -2,7 +2,6 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Add a backup client to a host
       dimensiondata_backup_client:
         server_ids:
@@ -10,4 +9,4 @@
         client_type: 'FA.Linux'
         storage_policy: '14 Day Storage Policy'
         schedule_policy: '12AM - 6AM'
-        state: "{{state_present}}"
+        state: present

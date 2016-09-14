@@ -2,11 +2,10 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Create MCP 2.0 firewall rule
       dimensiondata_firewall:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         network_domain: DevOps_NA12
         name: ansible_test1
-        state: "{{state_absent}}"
+        state: absent

@@ -2,11 +2,10 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Create Load Balancer Pool
       dimensiondata_load_balancer_pool:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         network_domain: ansible-capabilities-demo
         name: lb01_pool01
         description: a pool yo
@@ -25,4 +24,4 @@
 #          node3:
 #            ip: 10.1.1.134
 #            port: 8080
-        ensure: "{{ensure_present}}"
+        ensure: present

@@ -2,12 +2,11 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Create NAT rule
       dimensiondata_nat_rule:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         network_domain: ansible-capabilities-demo
         internal_ip: 10.1.1.10
         external_ip: 168.128.29.125
-        ensure: "{{ensure_absent}}"
+        ensure: absent

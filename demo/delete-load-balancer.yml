@@ -2,11 +2,10 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Delete Load Balancer
       dimensiondata_load_balancer:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         network_domain: my_net_domain
         name: web_lb01
-        ensure: "{{ensure_absent}}"
+        ensure: absent

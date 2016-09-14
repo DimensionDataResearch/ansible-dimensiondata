@@ -2,16 +2,15 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Delete MCP 1.0 network
       dimensiondata_network:
-        region: "{{region}}"
+        region: na
         location: NA5
         name: ansible-test1
-        state: "{{state_absent}}"
+        state: absent
     - name: Delete MCP 2.0 network
       dimensiondata_network:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         name: ansible-test2
-        state: "{{state_absent}}"
+        state: absent

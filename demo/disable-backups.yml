@@ -2,11 +2,10 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Disable backups on a host
       dimensiondata_backup:
         server_ids:
           - '7ee719e9-7ae9-480b-9f16-c6b5de03463c'
         service_plan: 'Enterprise'
-        state: "{{state_absent}}"
-        wait: "{{wait_yes}}"
+        state: absent
+        wait: yes

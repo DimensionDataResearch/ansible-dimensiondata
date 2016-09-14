@@ -2,10 +2,9 @@
 - hosts: 127.0.0.1
   connection: local
   tasks:
-  - include_vars: dimensiondata_vars.yml
   - dimensiondata_public_ip_block:
-      region: "{{region}}"
-      location: "{{location}}"
+      region: na
+      location: NA12
       network_domain: testing_network111
-      action: "{{action_delete}}"
+      action: delete
       block_id: 62800068-0000-0000-0000-b8ca3a5d9ef8

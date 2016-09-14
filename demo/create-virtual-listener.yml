@@ -3,11 +3,10 @@
   connection: local
 
   tasks:
-    - include_vars: dimensiondata_vars.yml
     - name: Create a Virtual Listener with ALL params
       dimensiondata_virtual_listener:
-        region: "{{region}}"
-        location: "{{location}}"
+        region: na
+        location: NA12
         network_domain: jayross_network
         name: virt_this_should_work
         ex_description: virt_this_should_work
@@ -20,6 +19,6 @@
         irule_persis_prof_protocol: UDP
         protocol: HTTP
         source_port_preservation: PRESERVE
-        ensure: "{{ensure_present}}"
+        ensure: present
 
 
